@@ -25,7 +25,7 @@ class Session:
 
     """
 
-    def __init__(self, DSIparser, num_trials):
+    def __init__(self, DSIparser):
 
         #memebers
         self.modelMI = None
@@ -94,7 +94,7 @@ class Session:
 
             # Choose the best prediction
             command_pred = Commands.idle
-            mi_pred, mi_acc = self.modelMI.online_predict(signalArray, self.eeg) # see bci4als/src/bci4als/experiments/online.py, try bci4als/examples/online_training.py
+            mi_pred, _, mi_acc = self.modelMI.online_predict(signalArray, self.eeg) # see bci4als/src/bci4als/experiments/online.py, try bci4als/examples/online_training.py
             if mi_acc >= self.acc_thresh:
                 command_pred = mi_pred
             ssvep_pred, ssvep_acc = SSVEPmodel.predictModel(signalArray, self.modelSSVEP, self.DSIparser)

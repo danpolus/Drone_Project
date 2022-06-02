@@ -7,7 +7,6 @@ project_params.electrodes_fn = [project_params.data_fp '\electrodes\Standard-10-
 project_params.NON_EEG_ELECTRODES = {'A1','A2','X1','X2','X3','TRG','Pz_CM'};
 project_params.head_radius = 1; %used to get rid of out-of-scalp channels
 project_params.fs = 300;
-project_params.augmentation_factor = 10;
 
 %%%%eeglab pipelineParams
 %filtering parameters:
@@ -52,7 +51,7 @@ project_params.psd.overlap_percent = 0;
 project_params.nftfit.params2fit = {}; %use typical
 project_params.nftfit.spatial_fit_flg = false;
 project_params.nftfit.psdMethod = 'fft';
-project_params.nftfit.freqBandHz = [3 40]; %maybe narrow, to avoid poor fitting 
+project_params.nftfit.freqBandHz = [2 40]; %maybe narrow, to avoid poor fitting 
 project_params.nftfit.npoints = 2e4;
 project_params.nftfit.chisqThrsh = 7; %for spatial fit warning
 
@@ -63,3 +62,11 @@ project_params.nftsim.grid_edge = 12; % pi/4*(grid_edge/2)^2 >= number of experi
 % project_params.nftsim.out_dt = delta_t;
 project_params.nftsim.fs = project_params.fs*2;
 project_params.nftsim.out_dt = 1/project_params.fs;
+
+%%%%Augmentation
+project_params.augmentation.augment_correct_trial_only_flg = false;
+project_params.augmentation.factor = 10;
+project_params.augmentation.variation_factor = 0.1;
+project_params.augmentation.n_trials_same_params = 10;
+project_params.augmentation.params_to_vary = {'alpha',  'beta',    't0',         'phin'};
+project_params.augmentation.params_lim     = {[10 150], [200 800], [0.075 0.24], [0.5e-5 1.5e-5]};

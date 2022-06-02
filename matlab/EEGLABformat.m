@@ -1,7 +1,7 @@
 %creates EEGLAB structure for the data
-%cleans the data
+%cleans the data (finds bad epochs)
 %
-function EEG = EEGLAB_clean(train_data, fn, fp, Label, project_params, OP_MODE, plot_flg)
+function EEG = EEGLABformat(train_data, fn, fp, Label, project_params, clean_flg, plot_flg)
 
 %convert to EEGLAB format
 EEG = [];
@@ -41,10 +41,8 @@ if plot_flg
 end
 
 %clean data
-if ~strcmp(OP_MODE,'CSP_SOURCE_AUG')
+if clean_flg
     EEG = eeglab_pipeline(EEG, project_params.pipelineParams, 0, 0);
-
-    %plot cleaned data
     if plot_flg
         EEGplot = pop_eegfiltnew(EEG, 0.1, []);
         pop_eegplot(EEGplot, 1, 0, 0, [], 'srate',EEG.srate, 'winlength',6, 'eloc_file',[]);

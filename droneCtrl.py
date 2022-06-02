@@ -23,6 +23,7 @@ class Commands(Enum):
     right = 6
     flip = 69
     stop = -1
+    error = -2
 
 is_active = True
 
