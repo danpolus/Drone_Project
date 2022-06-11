@@ -50,10 +50,7 @@ class Session:
             with open(self.modelSSVEPfn, 'wb') as file:  # save SSVEP model
                 pickle.dump(self.modelSSVEP, file)
         else:
-            self.modelMI = pickle.load(open(self.modelMIfn, 'rb'))
-            if not self.modelMI and sessType != SessionType.OfflineExpMI:
-                raise Exception("*****Something went wrong: MI/SSVEP model not found*****")
-            self.modelMI = offline_experiment(self.eeg, self.modelMI, sessType)
+            self.modelMI = offline_experiment(self.eeg, sessType)
             with open(self.modelMIfn, 'wb') as file: #save MI model
                 pickle.dump(self.modelMI, file)
 

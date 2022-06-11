@@ -7,6 +7,7 @@ project_params.electrodes_fn = [project_params.data_fp '\electrodes\Standard-10-
 project_params.NON_EEG_ELECTRODES = {'A1','A2','X1','X2','X3','TRG','Pz_CM'};
 project_params.head_radius = 1; %used to get rid of out-of-scalp channels
 project_params.fs = 300;
+project_params.minSectLenSec = 10; 
 
 %%%%eeglab pipelineParams
 %filtering parameters:
@@ -65,8 +66,9 @@ project_params.nftsim.out_dt = 1/project_params.fs;
 
 %%%%Augmentation
 project_params.augmentation.augment_correct_trial_only_flg = false;
-project_params.augmentation.factor = 10;
+project_params.augmentation.factor = 15;
+% project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
+project_params.augmentation.n_variations = 1*project_params.augmentation.factor;
+% project_params.augmentation.params2vary = {'alpha',[10 150];  'beta',[200 800];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations
+project_params.augmentation.params2vary = {'alpha',[10 150];  'beta',[200 800]};
 project_params.augmentation.variation_factor = 0.1;
-project_params.augmentation.n_trials_same_params = 10;
-project_params.augmentation.params_to_vary = {'alpha',  'beta',    't0',         'phin'};
-project_params.augmentation.params_lim     = {[10 150], [200 800], [0.075 0.24], [0.5e-5 1.5e-5]};
