@@ -40,7 +40,7 @@ class Session:
 
         self.eeg = eeg.EEG(DSIparser, self.epoch_len_sec)
 
-    def train_model(self, sessType: SessionType):
+    def train_model(self, sessType: SessionType, train_trials_percent=100):
         if sessType == SessionType.Online:
             raise Exception("run Online directly with run_online!")
         elif sessType == SessionType.OfflineExpSSVEP:
@@ -50,7 +50,7 @@ class Session:
             with open(self.modelSSVEPfn, 'wb') as file:  # save SSVEP model
                 pickle.dump(self.modelSSVEP, file)
         else:
-            self.modelMI = offline_experiment(self.eeg, sessType)
+            self.modelMI = offline_experiment(self.eeg, sessType, train_trials_percent)
             with open(self.modelMIfn, 'wb') as file: #save MI model
                 pickle.dump(self.modelMI, file)
 

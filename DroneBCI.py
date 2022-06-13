@@ -11,14 +11,18 @@ import Session as sess
 from droneCtrl import Commands
 
 if __name__ == "__main__":
-
+    #
+    # train_trials_percent = 100
+    # sessType = sess.SessionType.OfflineTrainLdaMI
     ans = input('Select Session Type:     0:Online   1:SSVEP training  2:MI training   3:Train MI Csp from file   4:Train MI Lda from file ')
     sessType = sess.SessionType(int(ans))
-    # sessType = sess.SessionType.OfflineTrainCspMI
+    train_trials_percent = 100
+    if sessType == sess.SessionType.OfflineExpMI or sessType == sess.SessionType.OfflineTrainCspMI:
+        train_trials_percent = int(input('percent of trials for training:' ))
 
     if sessType == sess.SessionType.OfflineTrainCspMI or sessType == sess.SessionType.OfflineTrainLdaMI:
         eegSession = sess.Session(DSIparser=None)
-        eegSession.train_model(sessType)
+        eegSession.train_model(sessType, train_trials_percent)
 
     else:
 
@@ -30,7 +34,7 @@ if __name__ == "__main__":
         eegSession = sess.Session(DSIparser)
 
         if sessType == sess.SessionType.OfflineExpMI:
-            eegSession.train_model(sessType)
+            eegSession.train_model(sessType,train_trials_percent)
 
         else:
 
@@ -59,4 +63,5 @@ if __name__ == "__main__":
                 pFlicker.join() #kill
                 tOnline.join()
                 tDrone.join()
-    # sys.exit()
+
+        # sys.exit()
