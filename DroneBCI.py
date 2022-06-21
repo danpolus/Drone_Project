@@ -1,26 +1,26 @@
 #main script of droneBCI project
 
-import droneCtrl as drone
-import DSI_to_Python as dsi
 import threading
 import queue
-import Show_Flashes
 from multiprocessing import Process
 import signal as sig
+
 import Session as sess
-from droneCtrl import Commands
+import droneCtrl as drone
+import DSI_to_Python as dsi
+import Show_Flashes
 
 if __name__ == "__main__":
-    #
+
     # train_trials_percent = 100
     # sessType = sess.SessionType.OfflineTrainLdaMI
-    ans = input('Select Session Type:     0:Online   1:SSVEP training  2:MI training   3:Train MI Csp from file   4:Train MI Lda from file ')
+    ans = input('Select Session Type:     0:Online   1:MI testing online   2:SSVEP training   3:MI training   4:Train MI Csp from file   5:Train MI Lda from file   6:Calculate test accuracy from file')
     sessType = sess.SessionType(int(ans))
     train_trials_percent = 100
     if sessType == sess.SessionType.OfflineExpMI or sessType == sess.SessionType.OfflineTrainCspMI:
         train_trials_percent = int(input('percent of trials for training:' ))
 
-    if sessType == sess.SessionType.OfflineTrainCspMI or sessType == sess.SessionType.OfflineTrainLdaMI:
+    if sessType == sess.SessionType.OfflineTrainCspMI or sessType == sess.SessionType.OfflineTrainLdaMI or sessType == sess.SessionType.TestAccuracy:
         eegSession = sess.Session(DSIparser=None)
         eegSession.train_model(sessType, train_trials_percent)
 
@@ -36,6 +36,9 @@ if __name__ == "__main__":
         if sessType == sess.SessionType.OfflineExpMI:
             eegSession.train_model(sessType,train_trials_percent)
 
+        elif sessType == sess.SessionType.OnlineExpMI:
+            eegSession.run_online_experiment_mi()
+
         else:
 
             #start the SSVEP stimuli
@@ -49,7 +52,7 @@ if __name__ == "__main__":
 
                 #commands queue
                 CommandsQueue = queue.Queue(0)
-                CommandsQueue.put([Commands.up, 'AUTO TAKE OFF']) #auto takeoff
+                CommandsQueue.put([drone.Commands.up, 'AUTO TAKE OFF']) #auto takeoff
 
                 #start the online session
                 tOnline = threading.Thread(target=eegSession.run_online, args=(CommandsQueue,))

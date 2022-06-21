@@ -3,10 +3,12 @@
 from enum import Enum
 class SessionType(Enum):
     Online = 0
-    OfflineExpSSVEP = 1
-    OfflineExpMI = 2
-    OfflineTrainCspMI = 3
-    OfflineTrainLdaMI = 4
+    OnlineExpMI = 1
+    OfflineExpSSVEP = 2
+    OfflineExpMI = 3
+    OfflineTrainCspMI = 4
+    OfflineTrainLdaMI = 5
+    TestAccuracy = 6
 
 import pickle
 import time
@@ -16,7 +18,8 @@ import SSVEPmodel
 
 import sys
 sys.path.append('../bci4als/')
-from examples.offline_training import offline_experiment
+from scripts.offline_training import offline_experiment
+from scripts.online_training import online_experiment
 import src.bci4als.eeg as eeg
 
 class Session:
@@ -41,18 +44,23 @@ class Session:
         self.eeg = eeg.EEG(DSIparser, self.epoch_len_sec)
 
     def train_model(self, sessType: SessionType, train_trials_percent=100):
-        if sessType == SessionType.Online:
-            raise Exception("run Online directly with run_online!")
+        if sessType == SessionType.Online or sessType == SessionType.OnlineExpMI:
+            raise Exception("This is OFFLINE!")
         elif sessType == SessionType.OfflineExpSSVEP:
             self.eeg.on()
             self.modelSSVEP = SSVEPmodel.trainModel(self.DSIparser,self.epoch_len_sec)
             self.eeg.off()
-            with open(self.modelSSVEPfn, 'wb') as file:  # save SSVEP model
-                pickle.dump(self.modelSSVEP, file)
+            if self.modelSSVEP != None:
+                with open(self.modelSSVEPfn, 'wb') as file:  # save SSVEP model
+                    pickle.dump(self.modelSSVEP, file)
         else:
             self.modelMI = offline_experiment(self.eeg, sessType, train_trials_percent)
-            with open(self.modelMIfn, 'wb') as file: #save MI model
-                pickle.dump(self.modelMI, file)
+            if self.modelMI != None:
+                with open(self.modelMIfn, 'wb') as file: #save MI model
+                    pickle.dump(self.modelMI, file)
+
+    def run_online_experiment_mi(self):
+        online_experiment(self.eeg)
 
     def run_online(self, CommandsQueue):
 
@@ -91,7 +99,7 @@ class Session:
 
             # Choose the best prediction
             command_pred = Commands.idle
-            mi_pred, _, mi_acc = self.modelMI.online_predict(signalArray, self.eeg) # see bci4als/src/bci4als/experiments/online.py, try bci4als/examples/online_training.py
+            mi_pred, mi_acc = self.modelMI.online_predict(signalArray, self.eeg) # see bci4als/src/bci4als/experiments/online.py, try bci4als/examples/online_training.py
             if mi_acc >= self.acc_thresh:
                 command_pred = mi_pred
             ssvep_pred, ssvep_acc = SSVEPmodel.predictModel(signalArray, self.modelSSVEP, self.DSIparser)
