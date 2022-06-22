@@ -19,7 +19,7 @@ import SSVEPmodel
 import sys
 sys.path.append('../bci4als/')
 from scripts.offline_training import offline_experiment
-from scripts.online_training import online_experiment
+from scripts.online_testing import online_experiment
 import src.bci4als.eeg as eeg
 
 class Session:
