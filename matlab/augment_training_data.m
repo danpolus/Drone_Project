@@ -21,8 +21,6 @@ else
 end
 project_params.nftsim.grid_edge = 1;
 
-out_fn_prefix = 'alpha_beta_aug15_';
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % [in_fn, in_fp] = uigetfile([project_params.data_fp '\*.mat'], 'select trainig data');
@@ -134,7 +132,7 @@ for iFolder = 1:length(in_fp)
 
     end
 
-    save([in_fp{iFolder} out_fn_prefix out_fn],'train_data_trials','train_data_labels','augmented_data_trials','augmented_data_labels');
+    save([in_fp{iFolder} project_params.out_fn_prefix out_fn],'train_data_trials','train_data_labels','augmented_data_trials','augmented_data_labels');
 
 end
 

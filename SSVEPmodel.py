@@ -7,38 +7,29 @@ import pyttsx3
 import numpy as np
 import pandas as pd
 import time
-from droneCtrl import Commands
+from projectParams import getParams, DroneCommands
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pickle
 
-def signalProc(signalArray, DSIparser):
+def signalProc(signalArray, DSIparser, projParams):
     """
     "Signal processing function" that responsible for cleaning,  channel selection,  feature extraction
       input:data chunk nparray(n_channels , n_samples), DSIparser
       output:  features vector
     """
 
-    #filtering params
-    low_pass = 4
-    high_pass = 40
-    #pwelch params
-    nperseg = 500
-    noverlap = 450
-    #electrodes of interest
-    electrodes = ["O1", "O2"]
-
     # Get electrode indeces from the montage
     elec = []
-    for el in electrodes:
+    for el in projParams['SsvepParams']['electrodes']:
         elec.append(DSIparser.montage.index(el))
 
     # Filter the data
-    Filtered = mne.filter.filter_data(signalArray[elec,:], sfreq=DSIparser.fsample, l_freq=low_pass, h_freq=high_pass, verbose=0)
+    Filtered = mne.filter.filter_data(signalArray[elec,:], sfreq=DSIparser.fsample, l_freq=projParams['SsvepParams']['l_freq'], h_freq=projParams['SsvepParams']['h_freq'], verbose=0)
     # PSD
-    _, Pxx_den = signal.welch(Filtered, fs=DSIparser.fsample, nperseg=nperseg, noverlap=noverlap, scaling='spectrum', axis=1)
+    _, Pxx_den = signal.welch(Filtered, fs=DSIparser.fsample, nperseg=500, noverlap=450, scaling='spectrum', axis=1)
 
     # use the whole PSD as features
     featuresDF = pd.DataFrame(Pxx_den.flatten())
@@ -52,24 +43,26 @@ def predictModel(signalArray, model, DSIparser):
     output: prediction, accuracy
     """
 
+    projParams = getParams()
+
     # Process the data
-    curTrialData = signalProc(signalArray, DSIparser)
+    curTrialData = signalProc(signalArray, DSIparser, projParams)
     # Predict
     pred  = model.predict(curTrialData.transpose())
     pred_prob  = model.predict_proba(curTrialData.transpose())
-    return Commands(pred), pred_prob.max()
+    return DroneCommands(pred), pred_prob.max()
 
-def trainModel(DSIparser, epoch_len_sec):
+def trainModel(DSIparser):
     """
     Calibration and creation of new model by offline training of SSVEP Paradigm
     input: DSIparser
     output: trained model - output is written into the queue
     """
 
-    playback_flg = False
+    projParams = getParams()
 
-    if playback_flg:
-        with open('SSVEPtraindata.pkl', 'rb') as file:
+    if projParams['RuntimeParams']['playback_flg']:
+        with open(projParams['FilesParams']['SSVEPtraindataFn'], 'rb') as file:
             recordedSignal = pickle.load(file)
             featuresDF = pickle.load(file)
             labels = pickle.load(file)
@@ -78,15 +71,14 @@ def trainModel(DSIparser, epoch_len_sec):
         featuresDF = pd.DataFrame()
         for iTrial in range(len(labels)):
             signalArray = recordedSignal[iTrial, :, :]
-            curTrialData = signalProc(signalArray, DSIparser)
+            curTrialData = signalProc(signalArray, DSIparser, projParams)
             featuresDF = pd.concat([featuresDF, curTrialData], axis=1)
 
     else:
         # Parameters
         # target_frq = [6, 7.5, 11] # Used frequencies
-        action = [Commands.idle, Commands.up, Commands.down, Commands.flip]
+        action = [DroneCommands.idle, DroneCommands.up, DroneCommands.down, DroneCommands.flip]
         nLabels = len(action)
-        nTrials = 20  # Trials per condition
 
         # Text to speech engine
         engine = pyttsx3.init()
@@ -103,18 +95,18 @@ def trainModel(DSIparser, epoch_len_sec):
             # Say the current stimuli to focus on
             engine.say(triggerText[iLabel])
             engine.runAndWait()
-            labels = np.append(labels, np.ones(nTrials)*action[iLabel].value)
+            labels = np.append(labels, np.ones(projParams['SsvepParams']['nTrainCondTrials'])*action[iLabel].value)
             iTrial = 0
-            while iTrial<nTrials:
-                time.sleep(epoch_len_sec/2)  # Wait 1 second
-                signalArray = DSIparser.get_epoch(epoch_len_sec)
+            while iTrial<projParams['SsvepParams']['nTrainCondTrials']:
+                time.sleep(projParams['EegParams']['epoch_len_sec']/2)  # Wait 1 second
+                signalArray = DSIparser.get_epoch(projParams['EegParams']['epoch_len_sec'])
                 if signalArray is None: #epoch samples are not ready yet
                     continue
 
                 # Save training data
                 recordedSignal = np.append(recordedSignal, np.expand_dims(signalArray, axis=0), axis=0)
                 # Process the data
-                curTrialData = signalProc(signalArray, DSIparser)
+                curTrialData = signalProc(signalArray, DSIparser, projParams)
                 # Append to the data frame
                 featuresDF = pd.concat([featuresDF, curTrialData], axis=1)
 
@@ -127,7 +119,7 @@ def trainModel(DSIparser, epoch_len_sec):
         engine.runAndWait()
 
         #save training data
-        with open("SSVEPtraindata.pkl", 'wb') as file:  # save train data
+        with open(projParams['FilesParams']['SSVEPtraindataFn'], 'wb') as file:  # save train data
             pickle.dump(recordedSignal, file)
             pickle.dump(featuresDF, file)
             pickle.dump(labels, file)
@@ -135,15 +127,15 @@ def trainModel(DSIparser, epoch_len_sec):
 
     # Train classifier
     model = LGBMClassifier(reg_lambda=0.05)
-    model_validation(model, featuresDF, labels) #check model accuracy
+    model_validation(model, featuresDF, labels, projParams) #check model accuracy
     model.fit(featuresDF.transpose(), labels)
 
     return model
 
-def model_validation(model, featuresDF, labels):
+def model_validation(model, featuresDF, labels, projParams):
     mpl.use('TkAgg')
 
-    X_train, X_test, y_train, y_test = train_test_split(featuresDF.transpose(), labels, test_size=0.3) # random_state=0
+    X_train, X_test, y_train, y_test = train_test_split(featuresDF.transpose(), labels, test_size=projParams['SsvepParams']['testPercent']) # random_state=0
     model.fit(X_train, y_train)
     #
     # print('Training accuracy {:.4f}'.format(model.score(featuresDF.transpose(), labels)))

@@ -8,28 +8,13 @@ import pygame
 import numpy as np
 import time
 import os
-import datetime
 import threading
-from enum import Enum
-
-
-class Commands(Enum):
-    idle = 0
-    up = 1
-    down = 2
-    forward = 3
-    back = 4
-    left = 5
-    right = 6
-    flip = 69
-    stop = -1
-    error = -2
+from projectParams import getParams, DroneCommands
 
 is_active = True
 
-def drone_video(tello):
+def drone_video(tello, projParams):
 
-    FPS = 120
     global is_active
 
     os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 60)
@@ -58,22 +43,22 @@ def drone_video(tello):
         frame = pygame.surfarray.make_surface(frame)
         screen.blit(frame, (0, 0))
         pygame.display.update()
-        time.sleep(1 / FPS)
+        time.sleep(1 / projParams['DroneParams']['FPS'])
 
 
 def run(CommandsQueue):
 
-    move_distance = 30
-    idle_sleep = 2 #sec
+    projParams = getParams()
+
     video_ready_sleep = 7#sec
     is_airborn = False
     global is_active
 
     tello = Tello()
     tello.connect()
-    tello.set_speed(10)
+    tello.set_speed(projParams['DroneParams']['speed'])
 
-    droneVid = threading.Thread(target=drone_video, args=(tello,))
+    droneVid = threading.Thread(target=drone_video, args=(tello,projParams,))
     droneVid.start()
     time.sleep(video_ready_sleep)
 
@@ -85,33 +70,33 @@ def run(CommandsQueue):
             # timeStamp = str(datetime.datetime.now())
             print('Command for Drone: ' + str(command[0]) + ' at time ' + command[1])
 
-            if command[0] == Commands.up:
+            if command[0] == DroneCommands.up:
                 if is_airborn:
-                    tello.move_up(move_distance)
+                    tello.move_up(projParams['DroneParams']['move_distance'])
                 else:
                     tello.takeoff()
                     is_airborn = True
-            # elif command[0] == Commands.idle:
-            #     time.sleep(idle_sleep)
-            elif command[0] == Commands.up and is_airborn == True:
-                tello.move_up(move_distance)
-            elif command[0] == Commands.down and is_airborn == True:
-                tello.move_down(move_distance)
-            elif command[0] == Commands.forward and is_airborn == True:
-                tello.move_forward(move_distance)
-            elif command[0] == Commands.back and is_airborn == True:
-                tello.move_back(move_distance)
-            elif command[0] == Commands.left and is_airborn == True:
-                tello.move_left(move_distance)
-            elif command[0] == Commands.right and is_airborn == True:
-                tello.move_right(move_distance)
-            elif command[0] == Commands.flip and is_airborn == True:
+            # elif command[0] == DroneCommands.idle:
+            #     time.sleep(projParams['DroneParams']['idle_sleep'])
+            elif command[0] == DroneCommands.up and is_airborn == True:
+                tello.move_up(projParams['DroneParams']['move_distance'])
+            elif command[0] == DroneCommands.down and is_airborn == True:
+                tello.move_down(projParams['DroneParams']['move_distance'])
+            elif command[0] == DroneCommands.forward and is_airborn == True:
+                tello.move_forward(projParams['DroneParams']['move_distance'])
+            elif command[0] == DroneCommands.back and is_airborn == True:
+                tello.move_back(projParams['DroneParams']['move_distance'])
+            elif command[0] == DroneCommands.left and is_airborn == True:
+                tello.move_left(projParams['DroneParams']['move_distance'])
+            elif command[0] == DroneCommands.right and is_airborn == True:
+                tello.move_right(projParams['DroneParams']['move_distance'])
+            elif command[0] == DroneCommands.flip and is_airborn == True:
                 tello.flip_back()
-            elif command[0] == Commands.stop:
+            elif command[0] == DroneCommands.stop:
                 is_active = False
                 break
         # else:
-        #     time.sleep(idle_sleep)
+        #     time.sleep(projParams['DroneParams']['idle_sleep'])
 
     tello.land()
     is_airborn = False

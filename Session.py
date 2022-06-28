@@ -1,20 +1,10 @@
 # decode paradigms from EEG
 
-from enum import Enum
-class SessionType(Enum):
-    Online = 0
-    OnlineExpMI = 1
-    OfflineExpSSVEP = 2
-    OfflineExpMI = 3
-    OfflineTrainCspMI = 4
-    OfflineTrainLdaMI = 5
-    TestAccuracy = 6
-
 import pickle
 import time
 import datetime
-from droneCtrl import Commands
 import SSVEPmodel
+from projectParams import SessionType, DroneCommands
 
 import sys
 sys.path.append('../bci4als/')
@@ -28,35 +18,32 @@ class Session:
 
     """
 
-    def __init__(self, DSIparser):
+    def __init__(self, DSIparser, projParams):
 
         #memebers
         self.modelMI = None
         self.modelSSVEP = None
         self.DSIparser = DSIparser
+        self.projParams = projParams
 
-        #constants
-        self.modelMIfn = "TrainedMImodel.pkl"
-        self.modelSSVEPfn = "TrainedSSVEPmodel.pkl"
-        self.epoch_len_sec = 2
         self.acc_thresh = 0.5 #accuracy threshold
 
-        self.eeg = eeg.EEG(DSIparser, self.epoch_len_sec)
+        self.eeg = eeg.EEG(DSIparser, projParams)
 
     def train_model(self, sessType: SessionType, train_trials_percent=100):
         if sessType == SessionType.Online or sessType == SessionType.OnlineExpMI:
             raise Exception("This is OFFLINE!")
         elif sessType == SessionType.OfflineExpSSVEP:
             self.eeg.on()
-            self.modelSSVEP = SSVEPmodel.trainModel(self.DSIparser,self.epoch_len_sec)
+            self.modelSSVEP = SSVEPmodel.trainModel(self.DSIparser)
             self.eeg.off()
             if self.modelSSVEP != None:
-                with open(self.modelSSVEPfn, 'wb') as file:  # save SSVEP model
+                with open(self.projParams['FilesParams']['modelSSVEPfn'], 'wb') as file:  # save SSVEP model
                     pickle.dump(self.modelSSVEP, file)
         else:
             self.modelMI = offline_experiment(self.eeg, sessType, train_trials_percent)
             if self.modelMI != None:
-                with open(self.modelMIfn, 'wb') as file: #save MI model
+                with open(self.projParams['FilesParams']['modelMIfn'], 'wb') as file: #save MI model
                     pickle.dump(self.modelMI, file)
 
     def run_online_experiment_mi(self):
@@ -64,18 +51,16 @@ class Session:
 
     def run_online(self, CommandsQueue):
 
-        playback_flg = False
-
-        self.modelMI = pickle.load(open(self.modelMIfn, 'rb'))
-        self.modelSSVEP = pickle.load(open(self.modelSSVEPfn, 'rb'))
+        self.modelMI = pickle.load(open(self.projParams['FilesParams']['modelMIfn'], 'rb'))
+        self.modelSSVEP = pickle.load(open(self.projParams['FilesParams']['modelSSVEPfn'], 'rb'))
         if not self.modelMI or not self.modelSSVEP:
             raise Exception("*****Something went wrong: MI/SSVEP model not found*****")
 
         self.DSIparser.runOnline = True
         self.eeg.on()
 
-        if playback_flg:
-            with open('SSVEPtraindata.pkl', 'rb') as file:
+        if self.projParams['RuntimeParams']['playback_flg']:
+            with open(self.projParams['FilesParams']['SSVEPtraindataFn'], 'rb') as file:
                 recordedSignal = pickle.load(file)
                 featuresDF = pickle.load(file)
                 labels = pickle.load(file)
@@ -84,11 +69,11 @@ class Session:
         while self.DSIparser.runOnline:  # To exit loop press ctrl+C
             # TODO:  ctrl+C kills the main thread. need to find better solution. (daemon thread?)
 
-            time.sleep(self.epoch_len_sec/2)  # Wait 1 second
+            time.sleep(self.projParams['EegParams']['epoch_len_sec']/2)  # Wait 1 second
 
-            if playback_flg:
+            if self.projParams['RuntimeParams']['playback_flg']:
                 signalArray = recordedSignal[cnt, :, :]
-                print('  played label is: ' + Commands(labels[cnt]).name.upper())
+                print('  played label is: ' + DroneCommands(labels[cnt]).name.upper())
                 cnt += 1
                 if cnt >= len(labels):
                     break
@@ -98,12 +83,12 @@ class Session:
                     continue
 
             # Choose the best prediction
-            command_pred = Commands.idle
-            mi_pred, mi_acc = self.modelMI.online_predict(signalArray, self.eeg) # see bci4als/src/bci4als/experiments/online.py, try bci4als/examples/online_training.py
-            if mi_acc >= self.acc_thresh:
+            command_pred = DroneCommands.idle
+            mi_pred, mi_acc = self.modelMI.online_predict(signalArray, self.eeg)
+            if mi_acc >= self.projParams['RuntimeParams']['acc_thresh']:
                 command_pred = mi_pred
             ssvep_pred, ssvep_acc = SSVEPmodel.predictModel(signalArray, self.modelSSVEP, self.DSIparser)
-            if ssvep_acc > mi_acc and ssvep_acc > self.acc_thresh:
+            if ssvep_acc > mi_acc and ssvep_acc > self.projParams['RuntimeParams']['acc_thresh']:
                 command_pred = ssvep_pred
 
             # Send prediction
