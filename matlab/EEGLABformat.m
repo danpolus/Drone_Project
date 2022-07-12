@@ -46,7 +46,7 @@ if clean_flg
     if plot_flg
         EEGplot = pop_eegfiltnew(EEG, 0.1, []);
         pop_eegplot(EEGplot, 1, 0, 0, [], 'srate',EEG.srate, 'winlength',6, 'eloc_file',[]);
-        figure; pop_spectopo(EEG, 1, [], 'EEG', 'freqrange',[0 EEG.srate/2], 'percent',10, 'electrodes','off');
+        figure; pop_spectopo(EEG, 1, [], 'EEG', 'freqrange',[0 EEG.srate/2], 'percent',100, 'electrodes','off');
         channel_map_topoplot(eeg2epoch(EEG), [], false);
     end
 end

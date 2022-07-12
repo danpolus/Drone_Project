@@ -11,7 +11,7 @@ eeg_clean_flg = false;
 plot_flg = false;
 
 if augment_csp_source_data
-    project_params.nftfit.freqBandHz = [8 29]; %a bit narrow band. set to original band if choose full fitting 
+    project_params.nftfit.freqBandHz = project_params.sourceFreqBandHz;
     in_fn = 'source_data.mat';
     out_fn = 'augmented_source_data.mat';
 else
