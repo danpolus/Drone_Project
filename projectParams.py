@@ -45,6 +45,7 @@ def getParams():
         projParams['MiParams']['clean_epochs_ar_flg'] = True
         projParams['MiParams']['max_bad_chan_in_epoch'] = 1
         projParams['MiParams']['n_csp_comp'] = 6
+        projParams['MiParams']['power_bands'] = [8,12,16,20,25,30] # [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']]
         projParams['MiParams']['nCV'] = 20
         projParams['MiParams']['nFold'] = 5
 
@@ -61,12 +62,14 @@ def getParams():
 
         projParams['RuntimeParams']['acc_thresh'] = 0.5 #accuracy threshold
         projParams['RuntimeParams']['localhost'] = 8844
-        projParams['RuntimeParams']['playback_flg'] = False
+        projParams['RuntimeParams']['playback_Online_flg'] = False
+        projParams['RuntimeParams']['playback_OfflineExpSSVEP_flg'] = False
 
         projParams['FilesParams']['datasetsFp'] = "C:\My Files\Work\BGU\Datasets\drone BCI"
         projParams['FilesParams']['cspFittedModelName'] = "model.pkl" # None "model_30trials.pkl"
         projParams['FilesParams']['modelMIfn'] = "TrainedMImodel.pkl"
         projParams['FilesParams']['modelSSVEPfn'] = "TrainedSSVEPmodel.pkl"
+        projParams['FilesParams']['OnlineDataFn'] = "OnlineData.pkl"
         projParams['FilesParams']['SSVEPtraindataFn'] = "SSVEPtraindata.pkl"
         projParams['FilesParams']['trainDataFn'] = "train_data.mat"
         projParams['FilesParams']['sourceDataFn'] = "source_data.mat" # None

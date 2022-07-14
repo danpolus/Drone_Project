@@ -78,6 +78,6 @@ project_params.augmentation.factor = 10;
 % project_params.augmentation.params2vary = {'alpha',[10 150];  'beta',[100 800];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations
 project_params.augmentation.params2vary = {'alpha',[10 150];  'beta',[100 800]};
 project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
-% project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor;
+% project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor; %*10
 project_params.augmentation.variation_factor = 0.1;
 project_params.out_fn_prefix = '';

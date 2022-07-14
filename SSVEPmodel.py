@@ -14,64 +14,63 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pickle
 
-def signalProc(signalArray, DSIparser, projParams):
+def signalProc(signalArray, eeg, projParams):
     """
     "Signal processing function" that responsible for cleaning,  channel selection,  feature extraction
-      input:data chunk nparray(n_channels , n_samples), DSIparser
+      input:data chunk nparray(n_channels , n_samples), eeg
       output:  features vector
     """
 
     # Get electrode indeces from the montage
     elec = []
     for el in projParams['SsvepParams']['electrodes']:
-        elec.append(DSIparser.montage.index(el))
+        elec.append(eeg.chan_names.index(el))
 
     # Filter the data
-    Filtered = mne.filter.filter_data(signalArray[elec,:], sfreq=DSIparser.fsample, l_freq=projParams['SsvepParams']['l_freq'], h_freq=projParams['SsvepParams']['h_freq'], verbose=0)
+    Filtered = mne.filter.filter_data(signalArray[elec,:], sfreq=eeg.sfreq, l_freq=projParams['SsvepParams']['l_freq'], h_freq=projParams['SsvepParams']['h_freq'], verbose=0)
     # PSD
-    _, Pxx_den = signal.welch(Filtered, fs=DSIparser.fsample, nperseg=500, noverlap=450, scaling='spectrum', axis=1)
+    _, Pxx_den = signal.welch(Filtered, fs=eeg.sfreq, nperseg=500, noverlap=450, scaling='spectrum', axis=1)
 
     # use the whole PSD as features
     featuresDF = pd.DataFrame(Pxx_den.flatten())
 
     return featuresDF
 
-def predictModel(signalArray, model, DSIparser):
+def predictModel(signalArray, model, eeg):
     """
     model prediction
-    input: signalArray, model, DSIparser
+    input: signalArray, model, eeg
     output: prediction, accuracy
     """
 
     projParams = getParams()
 
     # Process the data
-    curTrialData = signalProc(signalArray, DSIparser, projParams)
+    curTrialData = signalProc(signalArray, eeg, projParams)
     # Predict
     pred  = model.predict(curTrialData.transpose())
     pred_prob  = model.predict_proba(curTrialData.transpose())
     return DroneCommands(pred), pred_prob.max()
 
-def trainModel(DSIparser):
+def trainModel(eeg):
     """
     Calibration and creation of new model by offline training of SSVEP Paradigm
-    input: DSIparser
+    input: eeg
     output: trained model - output is written into the queue
     """
 
     projParams = getParams()
 
-    if projParams['RuntimeParams']['playback_flg']:
+    if projParams['RuntimeParams']['playback_OfflineExpSSVEP_flg']:
         with open(projParams['FilesParams']['SSVEPtraindataFn'], 'rb') as file:
             recordedSignal = pickle.load(file)
-            featuresDF = pickle.load(file)
             labels = pickle.load(file)
 
-        #preprocessing again
+        #preprocessing and features
         featuresDF = pd.DataFrame()
         for iTrial in range(len(labels)):
             signalArray = recordedSignal[iTrial, :, :]
-            curTrialData = signalProc(signalArray, DSIparser, projParams)
+            curTrialData = signalProc(signalArray, eeg, projParams)
             featuresDF = pd.concat([featuresDF, curTrialData], axis=1)
 
     else:
@@ -90,6 +89,7 @@ def trainModel(DSIparser):
         featuresDF = pd.DataFrame()
         recordedSignal  = np.empty(shape=[0, 25, 600]) #save training data
 
+        eeg.on()
         # Collecting labeled data
         for iLabel in range(nLabels):
             # Say the current stimuli to focus on
@@ -99,14 +99,14 @@ def trainModel(DSIparser):
             iTrial = 0
             while iTrial<projParams['SsvepParams']['nTrainCondTrials']:
                 time.sleep(projParams['EegParams']['epoch_len_sec']/2)  # Wait 1 second
-                signalArray = DSIparser.get_epoch(projParams['EegParams']['epoch_len_sec'])
+                signalArray = eeg.get_board_data()
                 if signalArray is None: #epoch samples are not ready yet
                     continue
 
                 # Save training data
                 recordedSignal = np.append(recordedSignal, np.expand_dims(signalArray, axis=0), axis=0)
                 # Process the data
-                curTrialData = signalProc(signalArray, DSIparser, projParams)
+                curTrialData = signalProc(signalArray, eeg, projParams)
                 # Append to the data frame
                 featuresDF = pd.concat([featuresDF, curTrialData], axis=1)
 
@@ -114,14 +114,15 @@ def trainModel(DSIparser):
 
                 iTrial += 1
 
+        eeg.off()
+
         # Say training session is over
         engine.say('Open your eyes')
         engine.runAndWait()
 
         #save training data
-        with open(projParams['FilesParams']['SSVEPtraindataFn'], 'wb') as file:  # save train data
+        with open(projParams['FilesParams']['SSVEPtraindataFn'], 'wb') as file:
             pickle.dump(recordedSignal, file)
-            pickle.dump(featuresDF, file)
             pickle.dump(labels, file)
 
 
