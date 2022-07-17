@@ -58,15 +58,13 @@ class Session:
 
         if self.projParams['RuntimeParams']['playback_Online_flg']:
             recordedSignal = pickle.load(open(self.projParams['FilesParams']['OnlineDataFn'], 'rb'))
-            if not recordedSignal:
-                raise Exception("*****Something went wrong: playback recordings not found*****")
             cnt = 0
         else:
             self.eeg.on()
-            recordedSignal  = np.empty(shape=[0, len(self.eeg.chan_names), self.eeg.epoch_len_sec*self.eeg.sfreq])
+            recordedSignal  = np.empty(shape=[0, len(self.eeg.chan_names), int(self.eeg.epoch_len_sec*self.eeg.sfreq)])
 
         while self.DSIparser.runOnline:  # To exit loop press ctrl+C
-            # TODO:  ctrl+C kills the main thread. need to find better solution. (daemon thread?)
+            # TODO:  ctrl+C suppose to kill the main thread (but doesn't). need to find better solution. (daemon thread?)
 
             time.sleep(self.projParams['EegParams']['epoch_len_sec']/2)  # Wait 1 second
 
@@ -77,7 +75,7 @@ class Session:
                 cnt += 1
             else:
                 signalArray = self.eeg.get_board_data()
-                if signalArray is None: #epoch samples are not ready yet
+                if signalArray is None or signalArray.shape[1]!=int(self.eeg.epoch_len_sec*self.eeg.sfreq): #epoch samples are not ready yet
                     continue
                 recordedSignal = np.append(recordedSignal, np.expand_dims(signalArray, axis=0), axis=0)
 
@@ -86,7 +84,7 @@ class Session:
             mi_pred, mi_acc = self.modelMI.online_predict(signalArray, self.eeg)
             if mi_acc >= self.projParams['RuntimeParams']['acc_thresh']:
                 command_pred = mi_pred
-            ssvep_pred, ssvep_acc = SSVEPmodel.predictModel(signalArray, self.modelSSVEP, self.DSIparser)
+            ssvep_pred, ssvep_acc = SSVEPmodel.predictModel(signalArray, self.modelSSVEP, self.eeg)
             if ssvep_acc > mi_acc and ssvep_acc > self.projParams['RuntimeParams']['acc_thresh']:
                 command_pred = ssvep_pred
 
@@ -99,4 +97,3 @@ class Session:
             self.eeg.off()
             with open(self.projParams['FilesParams']['OnlineDataFn'], 'wb') as file:
                 pickle.dump(recordedSignal, file)
-

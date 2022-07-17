@@ -87,7 +87,7 @@ def trainModel(eeg):
         # Allocation
         labels = np.empty(shape=[0])
         featuresDF = pd.DataFrame()
-        recordedSignal  = np.empty(shape=[0, 25, 600]) #save training data
+        recordedSignal  = np.empty(shape=[0, len(eeg.chan_names), int(eeg.epoch_len_sec*eeg.sfreq)]) #save training data
 
         eeg.on()
         # Collecting labeled data
@@ -100,7 +100,7 @@ def trainModel(eeg):
             while iTrial<projParams['SsvepParams']['nTrainCondTrials']:
                 time.sleep(projParams['EegParams']['epoch_len_sec']/2)  # Wait 1 second
                 signalArray = eeg.get_board_data()
-                if signalArray is None: #epoch samples are not ready yet
+                if signalArray is None or signalArray.shape[1]!=int(eeg.epoch_len_sec*eeg.sfreq): #epoch samples are not ready yet
                     continue
 
                 # Save training data
