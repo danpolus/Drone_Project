@@ -61,6 +61,7 @@ project_params.nftfit.params2fit = {}; %use typical
 project_params.nftfit.spatial_fit_flg = false;
 project_params.nftfit.psdMethod = 'fft';
 project_params.nftfit.freqBandHz = [pipelineParams.passBandHz{1} pipelineParams.passBandHz{2}];
+project_params.nftfit.weigths1f_flg = false;
 project_params.nftfit.npoints = 2e4;
 project_params.nftfit.chisqThrsh = 7; %for spatial fit warning
 
@@ -73,11 +74,11 @@ project_params.nftsim.fs = project_params.fs*2;
 project_params.nftsim.out_dt = 1/project_params.fs;
 
 %%%%Augmentation
-project_params.augmentation.augment_correct_trial_only_flg = false;
-project_params.augmentation.factor = 10;
-% project_params.augmentation.params2vary = {'alpha',[10 150];  'beta',[100 800];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations
-project_params.augmentation.params2vary = {'alpha',[10 150];  'beta',[100 800]};
+project_params.augmentation.augment_correct_trial_only_flg = true;
+project_params.augmentation.factor = 3;
+% project_params.augmentation.params2vary = {'alpha',[10 150];  'gammae',[40,280];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations
+project_params.augmentation.params2vary = {'alpha',[10 150]};
 project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
 % project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor; %*10
-project_params.augmentation.variation_factor = 0.1;
+project_params.augmentation.variation_factor = 0.15;
 project_params.out_fn_prefix = '';

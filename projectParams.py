@@ -38,14 +38,15 @@ def getParams():
         projParams['MiParams']['label_keys'] = (1, 2, 3, 4) #MI labels of BCI IV dataset: {1: 'left', 2: 'right', 3: 'foot', 4: 'tongue'}
 
         projParams['MiParams']['full_screen'] = False
-        projParams['MiParams']['audio'] = True
-        projParams['MiParams']['model_type'] = 'csp_lda'
-        projParams['MiParams']['l_freq'] = 8
-        projParams['MiParams']['h_freq'] = 30
-        projParams['MiParams']['clean_epochs_ar_flg'] = True
+        projParams['MiParams']['audio'] = False
+        #projParams['MiParams']['decomposition'] = 'CSP'
+        #projParams['MiParams']['classifier'] = 'LDA'
+        projParams['MiParams']['l_freq'] = 8#6
+        projParams['MiParams']['h_freq'] = 30#40
+        projParams['MiParams']['clean_epochs_ar_flg'] = False
         projParams['MiParams']['max_bad_chan_in_epoch'] = 1
-        projParams['MiParams']['n_csp_comp'] = 6
-        projParams['MiParams']['power_bands'] = [8,12,16,20,25,30] # [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']]
+        projParams['MiParams']['n_csp_comp'] = 12 #6: 2class, 12: 4class
+        # projParams['MiParams']['power_bands'] = [8,12,16,20,25,30] #[6,12,18,24,30] # [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']]
         projParams['MiParams']['nCV'] = 20
         projParams['MiParams']['nFold'] = 5
 

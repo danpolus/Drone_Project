@@ -7,6 +7,7 @@ addpath(genpath('..\..\..\nft'));
 project_params = augmentation_params();
 
 augment_csp_source_data = true;
+band_power_normalization_flg = true; %good for band without low frequencies
 eeg_clean_flg = false;
 plot_flg = false;
 
@@ -62,10 +63,13 @@ for iFolder = 1:length(in_fp)
         EEG = EEGLABformat(train_data, in_fn, in_fp{iFolder}, uniqueLabels(iLabel), project_params, eeg_clean_flg, plot_flg);
 
         %for normalization
-        %     chanPower = bandpower(eeg2epoch(EEG).data' ,EEG.srate, project_params.nftfit.freqBandHz);
         chanAVs = mean(EEG.data,[2 3]);
-        EEG_filtered = pop_eegfiltnew(EEG, project_params.pipelineParams.passBandHz{1}, project_params.pipelineParams.passBandHz{2});
-        chanSTDs = std(EEG_filtered.data,0,[2 3]);
+        if band_power_normalization_flg
+            chanPower = bandpower(eeg2epoch(EEG).data' ,EEG.srate, project_params.nftfit.freqBandHz)';
+        else
+            EEG_filtered = pop_eegfiltnew(EEG, project_params.pipelineParams.passBandHz{1}, project_params.pipelineParams.passBandHz{2});
+            chanSTDs = std(EEG_filtered.data,0,[2 3]);
+        end
 
         trial_len_sec = EEG.pnts/EEG.srate;
         project_params.psd.window_sec = trial_len_sec;
@@ -93,10 +97,13 @@ for iFolder = 1:length(in_fp)
             %augment
             [central_chan_data, isSimSuccess] = variate_augmentation(NFTparams, Spectra, project_params, iChan, n_aug_trials, trial_len_sec);
             %normalize
-            central_chan_data = zscore(central_chan_data) * chanSTDs(iChan) + chanAVs(iChan);
-            %         central_chan_data = (central_chan_data - mean(central_chan_data)) * ...
-            %             sqrt(chanPower(iChan) / bandpower(central_chan_data, project_params.fs, project_params.nftfit.freqBandHz))...
-            %             + chanAVs(iChan);
+            if band_power_normalization_flg
+                central_chan_data = (central_chan_data - mean(central_chan_data)) * ... 
+                    sqrt(chanPower(iChan) / bandpower(central_chan_data, project_params.fs, project_params.nftfit.freqBandHz))...
+                    + chanAVs(iChan);  
+            else
+                central_chan_data = zscore(central_chan_data) * chanSTDs(iChan) + chanAVs(iChan);
+            end
             %place in EEGaug
             if isSimSuccess
                 EEGaug.data(strcmp({EEGaug.chanlocs.labels},EEG.chanlocs(iChan).labels), :) = central_chan_data;
@@ -105,6 +112,13 @@ for iFolder = 1:length(in_fp)
                     error('Augmentation Failure!');
                 end
                 EEGaug.bad_channels = [EEGaug.bad_channels {EEG.chanlocs(iChan).labels}];
+            end
+
+            if plot_flg
+                [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
+                    project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
+                figure; semilogy(Spectra.f,Spectra.P, Spectra.f_fit,abs(Spectra.P_fit), f,P);
+                xlabel('Hz');legend('experimental','fitted','simulated');
             end
         end
 
@@ -115,12 +129,16 @@ for iFolder = 1:length(in_fp)
         end
 
         %plot augmented data
-        if plot_flg && ~augment_csp_source_data
-            EEGplot = pop_select(EEGaug, 'nochannel', project_params.NON_EEG_ELECTRODES);
-            EEGplot = pop_eegfiltnew(EEGplot, 0.1, []);
-            pop_eegplot(EEGplot, 1, 0, 0, [], 'srate',EEGaug.srate, 'winlength',6, 'eloc_file',[]);
-            figure; pop_spectopo(EEGaug, 1, [], 'EEG', 'freqrange',[0 EEGaug.srate/2], 'percent',10, 'electrodes','off');
-            channel_map_topoplot(EEGaug, [], false);
+        if plot_flg
+            if augment_csp_source_data
+                EEGplot = EEG;  EEGplot.data = EEGaug.data;  EEGplot = eeg_checkset(EEGplot);
+                pop_eegplot(EEGplot, 1, 0, 0, [], 'srate',EEGplot.srate, 'winlength',6, 'eloc_file',[]);
+            else
+                EEGplot = pop_select(EEGaug, 'nochannel', project_params.NON_EEG_ELECTRODES);
+                pop_eegplot(pop_eegfiltnew(EEGplot, 0.1, []), 1, 0, 0, [], 'srate',EEGaug.srate, 'winlength',6, 'eloc_file',[]);
+            end
+            figure; pop_spectopo(EEGplot, 1, [], 'EEG', 'freqrange',[0 EEGplot.srate/2], 'percent',100, 'electrodes','off');
+            channel_map_topoplot(eeg2epoch(EEGplot), [], false);
         end
 
         %concatenate augmented data
