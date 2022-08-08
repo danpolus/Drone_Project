@@ -75,50 +75,60 @@ for iFolder = 1:length(in_fp)
         project_params.psd.window_sec = trial_len_sec;
         n_aug_trials = round(project_params.augmentation.factor*max(labelCounts) + max(labelCounts)-labelCounts(iLabel));
 
-        EEGaug = [];
-        for iChan=1:EEG.nbchan %augment each channel separately
-            %fit
-            [NFTparams, Spectra] = fit_nft(eeg2epoch(EEG), project_params, iChan, 0);
+        if project_params.augmentation.just_guasian_noise_flg
+            EEGaug = EEG;
+            EEGaug.data = EEGaug.data(:,:,randperm(EEGaug.trials));
+            EEGaug.data = repmat(EEGaug.data, [1, 1, ceil(n_aug_trials/EEG.trials)]);
+            EEGaug.data = EEGaug.data(:,:,1:n_aug_trials); EEGaug.trials = n_aug_trials;
+            EEGaug = eeg_checkset(eeg2epoch(EEGaug));
+            EEGaug.data = double(EEGaug.data + randn(size(EEGaug.data)).*std(EEGaug.data,0,2)*project_params.augmentation.variation_factor);
 
-            %simulate
-            if iChan == 1
-                if augment_csp_source_data
-                    EEGaug.data = [];
-                    EEGaug.chanlocs = EEG.chanlocs;
+        else
+            EEGaug = [];
+            for iChan=1:EEG.nbchan %augment each channel separately
+                %fit
+                [NFTparams, Spectra] = fit_nft(eeg2epoch(EEG), project_params, iChan, 0);
+
+                %simulate
+                if iChan == 1
+                    if augment_csp_source_data
+                        EEGaug.data = [];
+                        EEGaug.chanlocs = EEG.chanlocs;
+                    else
+                        project_params.nftsim.grid_edge = orig_grid_edge;
+                        [EEGaug, ~, ~, ~] = simulate_nft(NFTparams, Spectra, project_params, iChan, 0);
+                        EEGaug.data = EEGaug.data*0;
+                        EEGaug.bad_channels = [];
+                        project_params.nftsim.grid_edge = 1;
+                    end
+                end
+
+                %augment
+                [central_chan_data, isSimSuccess] = variate_augmentation(NFTparams, Spectra, project_params, iChan, n_aug_trials, trial_len_sec);
+                %normalize
+                if band_power_normalization_flg
+                    central_chan_data = (central_chan_data - mean(central_chan_data)) * ...
+                        sqrt(chanPower(iChan) / bandpower(central_chan_data, project_params.fs, project_params.nftfit.freqBandHz))...
+                        + chanAVs(iChan);
                 else
-                    project_params.nftsim.grid_edge = orig_grid_edge;
-                    [EEGaug, ~, ~, ~] = simulate_nft(NFTparams, Spectra, project_params, iChan, 0);
-                    EEGaug.data = EEGaug.data*0;
-                    EEGaug.bad_channels = [];
-                    project_params.nftsim.grid_edge = 1;
+                    central_chan_data = zscore(central_chan_data) * chanSTDs(iChan) + chanAVs(iChan);
                 end
-            end
-
-            %augment
-            [central_chan_data, isSimSuccess] = variate_augmentation(NFTparams, Spectra, project_params, iChan, n_aug_trials, trial_len_sec);
-            %normalize
-            if band_power_normalization_flg
-                central_chan_data = (central_chan_data - mean(central_chan_data)) * ... 
-                    sqrt(chanPower(iChan) / bandpower(central_chan_data, project_params.fs, project_params.nftfit.freqBandHz))...
-                    + chanAVs(iChan);  
-            else
-                central_chan_data = zscore(central_chan_data) * chanSTDs(iChan) + chanAVs(iChan);
-            end
-            %place in EEGaug
-            if isSimSuccess
-                EEGaug.data(strcmp({EEGaug.chanlocs.labels},EEG.chanlocs(iChan).labels), :) = central_chan_data;
-            else
-                if augment_csp_source_data
-                    error('Augmentation Failure!');
+                %place in EEGaug
+                if isSimSuccess
+                    EEGaug.data(strcmp({EEGaug.chanlocs.labels},EEG.chanlocs(iChan).labels), :) = central_chan_data;
+                else
+                    if augment_csp_source_data
+                        error('Augmentation Failure!');
+                    end
+                    EEGaug.bad_channels = [EEGaug.bad_channels {EEG.chanlocs(iChan).labels}];
                 end
-                EEGaug.bad_channels = [EEGaug.bad_channels {EEG.chanlocs(iChan).labels}];
-            end
 
-            if plot_flg
-                [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
-                    project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
-                figure; semilogy(Spectra.f,Spectra.P, Spectra.f_fit,abs(Spectra.P_fit), f,P);
-                xlabel('Hz');legend('experimental','fitted','simulated');
+                if plot_flg
+                    [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
+                        project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
+                    figure; semilogy(Spectra.f,Spectra.P, Spectra.f_fit,abs(Spectra.P_fit), f,P);
+                    xlabel('Hz');legend('experimental','fitted','simulated');
+                end
             end
         end
 

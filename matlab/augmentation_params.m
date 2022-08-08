@@ -2,7 +2,7 @@
 function project_params = augmentation_params()
 
 project_params.code_fp = '..\..\..';
-project_params.data_fp = 'C:\My Files\Work\BGU\Datasets\drone BCI';
+project_params.data_fp = 'D:\My Files\Work\BGU\Datasets\drone BCI';
 
 % project_params.electrodes_fn = [project_params.data_fp '\electrodes\Standard-10-20-Cap19.ced'];
 % project_params.NON_EEG_ELECTRODES = {'A1','A2','X1','X2','X3','TRG','Pz_CM'};
@@ -74,11 +74,12 @@ project_params.nftsim.fs = project_params.fs*2;
 project_params.nftsim.out_dt = 1/project_params.fs;
 
 %%%%Augmentation
-project_params.augmentation.augment_correct_trial_only_flg = true;
+project_params.augmentation.augment_correct_trial_only_flg = false;
 project_params.augmentation.factor = 3;
+project_params.augmentation.just_guasian_noise_flg = false;
 % project_params.augmentation.params2vary = {'alpha',[10 150];  'gammae',[40,280];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations
 project_params.augmentation.params2vary = {'alpha',[10 150]};
 project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
-% project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor; %*10
+% project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor*3;
 project_params.augmentation.variation_factor = 0.15;
 project_params.out_fn_prefix = '';
