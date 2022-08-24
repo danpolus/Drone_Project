@@ -74,7 +74,7 @@ project_params.nftsim.fs = project_params.fs*2;
 project_params.nftsim.out_dt = 1/project_params.fs;
 
 %%%%Augmentation
-project_params.augmentation.augment_correct_trial_only_flg = false;
+project_params.augmentation.augment_correct_trial_only_flg = true;
 project_params.augmentation.factor = 3;
 project_params.augmentation.just_guasian_noise_flg = false;
 % project_params.augmentation.params2vary = {'alpha',[10 150];  'gammae',[40,280];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations

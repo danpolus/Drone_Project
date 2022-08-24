@@ -9,7 +9,7 @@ EEG.setname = ['Training_Dat: label #' num2str(Label)];
 EEG.filename = [fn(1:end-3) 'set'];
 EEG.filepath = fp;
 EEG.srate = project_params.fs;
-EEG.data = permute(train_data.trials(train_data.labels==Label,:,:), [3,2,1]);
+EEG.data = train_data.trials(:,:,train_data.labels==Label);
 [EEG.nbchan,EEG.pnts,EEG.trials] = size(EEG.data);
 EEG.times = [0:(EEG.pnts-1)]/EEG.srate*1000;
 EEG.xmin = 0;

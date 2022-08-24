@@ -43,10 +43,12 @@ def getParams():
         #projParams['MiParams']['classifier'] = 'LDA'
         projParams['MiParams']['l_freq'] = 8#6
         projParams['MiParams']['h_freq'] = 30#40
-        projParams['MiParams']['clean_epochs_ar_flg'] = False
+        projParams['MiParams']['clean_epochs_ar_flg'] = False # clean_epochs_ar_flg = False  <->  augment_correct_trial_only_flg = true
         projParams['MiParams']['max_bad_chan_in_epoch'] = 1
         projParams['MiParams']['n_csp_comp'] = 12 #6: 2class, 12: 4class
         projParams['MiParams']['power_bands'] = [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']] #[8,12,16,20,25,30]  [6,12,18,24,30]  [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']]
+        projParams['MiParams']['feature_noise_aug_factor'] = 0 #3.  0 -> no augmentation 3
+        projParams['MiParams']['feature_noise_variation_factor'] = 0.15
         projParams['MiParams']['nCV'] = 20
         projParams['MiParams']['nFold'] = 5
 
@@ -76,7 +78,7 @@ def getParams():
         projParams['FilesParams']['sourceDataFn'] = "source_data.mat" # None
         projParams['FilesParams']['augSourceDataFn'] = "augmented_source_data.mat" # "alpha_beta_aug15_augmented_source_data.mat"
         projParams['FilesParams']['testDataFn'] = "test_data.mat" # "not_exist.file"
-        projParams['FilesParams']['onlineTestDataFn'] = "online_test_data.mat"
+        projParams['FilesParams']['onlineTestDataFn'] = "test_data.mat"
         projParams['FilesParams']['classResults'] = "class_results.csv"
 
         return projParams

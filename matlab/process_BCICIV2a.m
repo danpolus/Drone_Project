@@ -1,7 +1,7 @@
 %
 clear all; close all;
 
-fp = 'C:\My Files\Work\BGU\Datasets\drone BCI\External state-of-the-art\BCI IV left right leg tongue 9subj\';
+fp = 'D:\My Files\Work\BGU\Datasets\drone BCI\External state-of-the-art\BCI IV left right leg tongue 9subj\';
 out_train_fn = 'train_data.mat';
 out_test_fn = 'test_data.mat';
 
@@ -79,9 +79,14 @@ for iFile = 1:nFiles
 
     %save
     mkdir([in_fp EEG.setname]);
-    trials = permute(trials, [3,2,1]);
-    test_trials = permute(test_trials, [3,2,1]);
-    save([in_fp EEG.setname '\' out_train_fn], 'trials','labels');
-    save([in_fp EEG.setname '\' out_test_fn], 'test_trials','test_labels');
+    Trials_t = [];
+    Trials_t{1}.train_trials = permute(trials, [3,2,1]);
+    Trials_t{1}.train_labels = labels;
+    Trials_t{1}.train_pred_labels = [];
+    save([in_fp EEG.setname '\' out_train_fn], 'Trials_t');
+    Trials_t = [];
+    Trials_t{1}.test_trials = permute(test_trials, [3,2,1]);
+    Trials_t{1}.test_labels = test_labels;
+    save([in_fp EEG.setname '\' out_test_fn], 'Trials_t');
 
 end
