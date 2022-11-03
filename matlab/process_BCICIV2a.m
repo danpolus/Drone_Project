@@ -1,7 +1,7 @@
 %
 clear all; close all;
 
-fp = 'D:\My Files\Work\BGU\Datasets\drone BCI\External state-of-the-art\BCI IV left right leg tongue 9subj\';
+fp = 'C:\My Files\Work\BGU\Datasets\drone BCI\External state-of-the-art\BCI IV left right leg tongue 9subj\';
 out_train_fn = 'train_data.mat';
 out_test_fn = 'test_data.mat';
 

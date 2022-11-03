@@ -68,7 +68,7 @@ def getParams():
         projParams['RuntimeParams']['playback_Online_flg'] = False
         projParams['RuntimeParams']['playback_OfflineExpSSVEP_flg'] = False
 
-        projParams['FilesParams']['datasetsFp'] = "D:\My Files\Work\BGU\Datasets\drone BCI"
+        projParams['FilesParams']['datasetsFp'] = "C:\My Files\Work\BGU\Datasets\drone BCI"
         projParams['FilesParams']['cspFittedModelName'] = "model.pkl" # None "model_30trials.pkl"
         projParams['FilesParams']['modelMIfn'] = "TrainedMImodel.pkl"
         projParams['FilesParams']['modelSSVEPfn'] = "TrainedSSVEPmodel.pkl"

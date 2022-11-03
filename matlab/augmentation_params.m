@@ -2,7 +2,7 @@
 function project_params = augmentation_params()
 
 project_params.code_fp = '..\..\..';
-project_params.data_fp = 'D:\My Files\Work\BGU\Datasets\drone BCI';
+project_params.data_fp = 'C:\My Files\Work\BGU\Datasets\drone BCI';
 
 % project_params.electrodes_fn = [project_params.data_fp '\electrodes\Standard-10-20-Cap19.ced'];
 % project_params.NON_EEG_ELECTRODES = {'A1','A2','X1','X2','X3','TRG','Pz_CM'};
