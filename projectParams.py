@@ -1,5 +1,6 @@
 
 from enum import Enum
+import numpy as np
 
 class SessionType(Enum):
     Online = 0
@@ -26,12 +27,12 @@ def getParams():
 
         projParams = {'EegParams':{}, 'MiParams':{}, 'SsvepParams':{}, 'DroneParams':{}, 'RuntimeParams':{}, 'FilesParams':{}}
 
-        # projParams['EegParams']['epoch_len_sec'] = 2 # 2,3,4
+        # projParams['EegParams']['epoch_len_sec'] = 2.5
         # projParams['EegParams']['sfreq'] = 300
         # projParams['EegParams']['chan_names'] = ['P3','C3', 'F3', 'Fz', 'F4', 'C4', 'P4', 'Cz','CM', 'A1', 'Fp1', 'Fp2' , 'T3', 'T5', 'O1', 'O2', 'X3' , 'X2', 'F7', 'F8', 'X1', 'A2', 'T6', 'T4', 'TRG']
         # projParams['EegParams']['nonEEGchannels'] = ['X1','X2','X3','TRG','CM','A1','A2']
         # projParams['MiParams']['label_keys'] = (0, 1, 2) #MI labels for training: {0: 'right', 1: 'left', 2: 'idle', 3: 'tongue', 4: 'legs'}
-        projParams['EegParams']['epoch_len_sec'] = 2
+        projParams['EegParams']['epoch_len_sec'] = 2.5
         projParams['EegParams']['sfreq'] = 250
         projParams['EegParams']['chan_names'] = ['Fz','FC3', 'FC1', 'FCz', 'FC2', 'FC4', 'C5', 'C3', 'C1', 'Cz', 'C2', 'C4', 'C6', 'CP3', 'CP1', 'CPz', 'CP2', 'CP4', 'P1', 'Pz', 'P2', 'POz', 'EOG-left', 'EOG-central', 'EOG-right']
         projParams['EegParams']['nonEEGchannels'] = ['EOG-left', 'EOG-central', 'EOG-right']
@@ -45,12 +46,14 @@ def getParams():
         projParams['MiParams']['h_freq'] = 30#40
         projParams['MiParams']['clean_epochs_ar_flg'] = False # clean_epochs_ar_flg = False  <->  augment_correct_trial_only_flg = true
         projParams['MiParams']['max_bad_chan_in_epoch'] = 1
-        projParams['MiParams']['n_csp_comp'] = len(projParams['MiParams']['label_keys'])
+        projParams['MiParams']['n_csp_comp'] = int(np.ceil(len(projParams['MiParams']['label_keys'])/2 + 1)*2)
         projParams['MiParams']['power_bands'] = [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']] #[8,12,16,20,25,30]  [6,12,18,24,30]  [projParams['MiParams']['l_freq'], projParams['MiParams']['h_freq']]
+        projParams['MiParams']['feature'] = 'Entropy' #'BandPower' 'Entropy'
         projParams['MiParams']['feature_noise_aug_factor'] = 0 #3.  0 -> no augmentation 3
         projParams['MiParams']['feature_noise_variation_factor'] = 0.15
-        projParams['MiParams']['nCV'] = 20
-        projParams['MiParams']['nFold'] = 5
+        #projParams['MiParams']['nCV'] = 20
+        projParams['MiParams']['nFold'] = 7   if len(projParams['MiParams']['label_keys']) == 4 else   6
+        projParams['MiParams']['inverseCV'] = True
 
         projParams['SsvepParams']['electrodes'] = ["O1", "O2"] #electrodes of interest
         projParams['SsvepParams']['l_freq'] = 4

@@ -15,13 +15,12 @@ if __name__ == "__main__":
 
     projParams = getParams()
 
-    # train_trials_percent = 100
-    # sessType = SessionType.OfflineTrainLdaMI
+    train_trials_percent = 100
+    sessType = SessionType.OfflineTrainLdaMI
     ans = input('Select Session Type:     0:Online   1:MI testing online   2:SSVEP training   3:MI training   4:Train MI Csp from file   5:Train MI Lda from file   6:Calculate test accuracy from file')
     sessType = SessionType(int(ans))
-    train_trials_percent = 100
     if sessType == SessionType.OfflineExpMI or sessType == SessionType.OfflineTrainCspMI:
-        train_trials_percent = int(input('percent of trials for training:' ))
+        train_trials_percent = int(input('percent of trials for training: '))
 
     if sessType == SessionType.OfflineTrainCspMI or sessType == SessionType.OfflineTrainLdaMI or sessType == SessionType.TestAccuracy:
         eegSession = sess.Session(DSIparser=None, projParams=projParams)
