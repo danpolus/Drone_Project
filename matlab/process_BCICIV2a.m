@@ -4,13 +4,13 @@ clear all; close all;
 fp = 'C:\My Files\Work\BGU\Datasets\drone BCI\External state-of-the-art\BCI IV left right leg tongue 9subj\';
 out_train_fn = 'train_data.mat';
 out_test_fn = 'test_data.mat';
+project_params = augmentation_params();
 
-testset_percent = 0.3;
+testset_percent = 0;
 
 cue_events = {769, 770, 771, 772, 783};
 artifact_event = 1023;
-
-project_params = augmentation_params();
+timelim = [2.5 2.5+project_params.trial_len_sec];
 
 plot_flg = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,8 +39,8 @@ for iFile = 1:nFiles
     %extract MI trials
     [EEG.event.type] = EEG.event.edftype;
     all_events = [EEG.event.type];
-    EEG = pop_epoch(EEG, cue_events, [4-project_params.trial_len_sec  4], 'epochinfo','yes', 'newname',EEG.setname, 'verbose', 'no');
-    label_events = [EEG.event.type];
+    EEG = pop_epoch(EEG, cue_events, timelim, 'epochinfo','yes', 'newname',EEG.setname, 'verbose', 'no');
+%     label_events = [EEG.event.type];
 %     if length(unique(label_events)) > 1 && ... %check if identical to classlabel
 %         sum(classlabel ~= label_events - cue_events{1} + 1) > 1
 %         error('true labels does not match!');

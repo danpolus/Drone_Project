@@ -1,30 +1,75 @@
 clear all; close all; clc;
 
+titleFntSz = 16;
+sgtitleFntSz = 19;
+axisLabelFntSz = 14;
+axisTickFntSz = 14;
+linewidth = 2;
+
+nClass = '4';
+feature = {'bandpower','higuchi'};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%nCSP analysis
+x = [2 4 6 8 10];
+
+figure;
+sgtitle('Validation set classification accuracy as a function of #CSPs', 'FontSize',sgtitleFntSz);
+for iFeat = 1:length(feature)
+    T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a nCSP.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
+    valid = T{1:18,3:4:size(T,2)};
+
+    ax = subplot(2,1,iFeat); 
+    errorbar(x, mean(valid,1), std(valid,[],1), 'Color','#A2142F', 'linewidth',linewidth); 
+    xlim([x(1)-1 x(end)+1]); ylim([0 0.8]);
+    xlabel('#CSPs', 'FontSize',axisLabelFntSz); ylabel('\kappa', 'FontSize',axisLabelFntSz+2); 
+    ax.FontSize = axisTickFntSz;
+    if strcmp(feature{iFeat}, 'bandpower')
+        title('Total Power', 'FontSize',titleFntSz);
+    else
+        title('Higuchi', 'FontSize',titleFntSz);
+    end
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %percent analysis
+x = [100 50 33.33 25 20 16.67 14.28 10 7.15 5];
 
-T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a test percent.xlsx','Sheet','2class bandpower'); %bandpower higuchi
-x = [100 50 40 30 25 20 10];
+figure;
+sgtitle('Classification accuracy as a funtion of the traing set percent', 'FontSize',sgtitleFntSz);
+for iFeat = 1:length(feature)
+    T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a test percent.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
+    
+    ax = subplot(2,1,iFeat);
+    hold on
+    y = mean(T{1:18, 2:4:size(T,2)},1);
+    err = mean(T{1:18, 4:4:size(T,2)},1);
+    errorbar(x,y,err, 'linewidth',linewidth);
+    y = mean(T{1:18, 3:4:size(T,2)},1);
+    err = mean(T{1:18, 5:4:size(T,2)},1);
+    errorbar(x,y,err, 'linewidth',linewidth); 
+    xlim([0 110]); ylim([0 1.1]); set(gca,'xdir','reverse'); legend({'train','validation'}, 'FontSize',axisLabelFntSz, 'Location','northwest');
+    xlabel('data percentage', 'FontSize',axisLabelFntSz+2); ylabel('\kappa', 'FontSize',axisLabelFntSz+2);
+    ax.FontSize = axisTickFntSz;
+    %ax.XScale = 'log';
+    if strcmp(feature{iFeat}, 'bandpower')
+        title('Total Power', 'FontSize',titleFntSz);
+    else
+        title('Higuchi', 'FontSize',titleFntSz);
+    end
+    hold off
+end
 
 figure; 
-sgtitle('Mean (inter-subject) classification accuracy');
-y = mean(T{1:18,2:4:size(T,2)},1);
-err = mean(T{1:18,4:4:size(T,2)},1);
-subplot(1,2,1); errorbar(x,y,err, 'linewidth',2); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train');
-y = mean(T{1:18,3:4:size(T,2)},1);
-err = mean(T{1:18,5:4:size(T,2)},1);
-subplot(1,2,2); errorbar(x,y,err, 'linewidth',2); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation');
-
-figure; 
-sgtitle('Classification accuracy');
+sgtitle(['Classification accuracy ' nClass 'class ' feature{iFeat}]);
 y = T{1:18,2:4:size(T,2)};
 err = T{1:18,4:4:size(T,2)};
-subplot(2,2,1); plot(x,y, 'linewidth',1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train');
-subplot(2,2,2); plot(x,err, 'linewidth',1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train std');
+subplot(2,2,1); plot(x,y, 'linewidth',linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train');
+subplot(2,2,2); plot(x,err, 'linewidth',linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train std');
 y = T{1:18,3:4:size(T,2)};
 err = T{1:18,5:4:size(T,2)};
-subplot(2,2,3); plot(x,y, 'linewidth',1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation');
-subplot(2,2,4); plot(x,err, 'linewidth',1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation std');
+subplot(2,2,3); plot(x,y, 'linewidth',linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation');
+subplot(2,2,4); plot(x,err, 'linewidth',linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation std');
 
 idx = [17 18];
 figure; 

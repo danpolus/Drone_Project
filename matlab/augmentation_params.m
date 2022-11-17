@@ -7,11 +7,11 @@ project_params.data_fp = 'C:\My Files\Work\BGU\Datasets\drone BCI';
 % project_params.electrodes_fn = [project_params.data_fp '\electrodes\Standard-10-20-Cap19.ced'];
 % project_params.NON_EEG_ELECTRODES = {'A1','A2','X1','X2','X3','TRG','Pz_CM'};
 % project_params.fs = 300;
-% project_params.trial_len_sec = 2; %2 3 4
+% project_params.trial_len_sec = 2.5;
 project_params.electrodes_fn = [project_params.data_fp '\External state-of-the-art\BCI IV left right leg tongue 9subj\Standard-10-20-Cap22.locs'];
 project_params.NON_EEG_ELECTRODES = {'EOG-left', 'EOG-central', 'EOG-right'};
 project_params.fs = 250;
-project_params.trial_len_sec = 2;
+project_params.trial_len_sec = 2.5;
 project_params.sourceFreqBandHz = [8 30];
 
 project_params.head_radius = 1; %used to get rid of out-of-scalp channels
@@ -75,10 +75,10 @@ project_params.nftsim.out_dt = 1/project_params.fs;
 
 %%%%Augmentation
 project_params.augmentation.augment_correct_trial_only_flg = true;
-project_params.augmentation.factor = 3;
+project_params.augmentation.factor = 6;
 project_params.augmentation.just_guasian_noise_flg = false;
-% project_params.augmentation.params2vary = {'alpha',[10 150];  'gammae',[40,280];  't0',[0.075 0.24];  'phin',[0.5e-5 1.5e-5]}; %param name and limits. varying nus&phia - may cause biforcations
-project_params.augmentation.params2vary = {'alpha',[10 150]};
+% project_params.augmentation.params2vary = {'alpha',[10 150],14; 'gammae',[40 280],25; 't0',[0.04 0.24],0.003}; %param name, limits, standard deviation
+project_params.augmentation.params2vary = {'alpha',[10 150],14};
 project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
 % project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor*3;
 project_params.augmentation.variation_factor = 0.15;

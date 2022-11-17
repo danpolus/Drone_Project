@@ -50,7 +50,7 @@ for iFolder = 1:length(in_fp)
         Trials_t = Sources_t;
         clear("Sources_t");
     end
-    for iFold = 1:length(Trials_t)
+    for iFold = 1:length(Trials_t)-1 %last fold is the full set
 
         if augment_csp_source_data
             train_data.trials = permute(Trials_t{iFold}.train_source_data, [2,3,1]);
@@ -99,6 +99,7 @@ for iFolder = 1:length(in_fp)
                 for iChan=1:EEG.nbchan %augment each channel separately
                     %fit
                     [NFTparams, Spectra] = fit_nft(eeg2epoch(EEG), project_params, iChan, 0);
+%                     inspect_trials_fit(EEG, project_params, iLabel, iChan); %debug
 
                     %simulate
                     if iChan == 1
@@ -118,6 +119,7 @@ for iFolder = 1:length(in_fp)
                     end
 
                     %augment
+%                     NFTparams.alpha(:) = 100; %for plotting
                     [central_chan_data, isSimSuccess] = variate_augmentation(NFTparams, Spectra, project_params, iChan, n_aug_trials, trial_len_sec);
                     %normalize
                     if band_power_normalization_flg
@@ -138,10 +140,26 @@ for iFolder = 1:length(in_fp)
                     end
 
                     if plot_flg
+                        titleFntSz = 16;
+                        sgtitleFntSz = 19;
+                        axisLabelFntSz = 14;
+                        axisTickFntSz = 14;
+                        linewidth = 2;
+
                         [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
                             project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
-                        figure; semilogy(Spectra.f,Spectra.P, Spectra.f_fit,abs(Spectra.P_fit), f,P);
-                        xlabel('Hz');legend('experimental','fitted','simulated');
+
+                        figure; semilogy(Spectra.f,Spectra.P, Spectra.f_fit,abs(Spectra.P_fit), f,P, 'linewidth',linewidth);
+                        ax = gca;
+                        ax.FontSize = axisTickFntSz;
+                        xlabel('Hz', 'FontSize',axisLabelFntSz); ylabel('V^2', 'FontSize',axisLabelFntSz);
+
+%                         hold on
+%                         semilogy(f,P, '--', 'linewidth',linewidth-0.5);
+%                         hold off
+
+                        legend({'experimental','fitted','simulated t_0=0.085','simulated t_0=0.08','simulated t_0=0.095'}, 'FontSize',axisLabelFntSz);
+                        title('t_0 Parameter Variation Spectra', 'FontSize',titleFntSz);
                     end
                 end
             end

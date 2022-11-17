@@ -14,7 +14,7 @@ for iChunk = 1:project_params.augmentation.n_variations
     if iChunk > 1 %no NFT parameters variation at the first chunk
         for iParam = 1:size(project_params.augmentation.params2vary,1)
             pName = project_params.augmentation.params2vary{iParam,1};
-            pVal = NFTparams.(pName)(1) * unifrnd((1-project_params.augmentation.variation_factor),(1+project_params.augmentation.variation_factor));
+            pVal = normrnd(NFTparams.(pName)(1), project_params.augmentation.params2vary{iParam,3}*(1+project_params.augmentation.variation_factor));
             pVal = min(max(pVal, project_params.augmentation.params2vary{iParam,2}(1)), project_params.augmentation.params2vary{iParam,2}(2));
             simNFTparams.(pName)(:) = pVal; 
         end
