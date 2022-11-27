@@ -119,7 +119,7 @@ for iFolder = 1:length(in_fp)
                     end
 
                     %augment
-%                     NFTparams.alpha(:) = 100; %for plotting
+%                     NFTparams.t0(:) = 0.085; %for plotting
                     [central_chan_data, isSimSuccess] = variate_augmentation(NFTparams, Spectra, project_params, iChan, n_aug_trials, trial_len_sec);
                     %normalize
                     if band_power_normalization_flg
@@ -140,22 +140,22 @@ for iFolder = 1:length(in_fp)
                     end
 
                     if plot_flg
-                        titleFntSz = 16;
-                        sgtitleFntSz = 19;
-                        axisLabelFntSz = 14;
-                        axisTickFntSz = 14;
-                        linewidth = 2;
+                        titleFntSz = 26;
+                        sgtitleFntSz = 29;
+                        axisLabelFntSz = 24;
+                        axisTickFntSz = 24;
+                        linewidth = 4;
 
                         [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
                             project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
 
-                        figure; semilogy(Spectra.f,Spectra.P, Spectra.f_fit,abs(Spectra.P_fit), f,P, 'linewidth',linewidth);
+                        figure; semilogy(Spectra.f,Spectra.P,'k', Spectra.f_fit,abs(Spectra.P_fit),'--g', f,P,'m', 'linewidth',linewidth);
                         ax = gca;
                         ax.FontSize = axisTickFntSz;
                         xlabel('Hz', 'FontSize',axisLabelFntSz); ylabel('V^2', 'FontSize',axisLabelFntSz);
 
 %                         hold on
-%                         semilogy(f,P, '--', 'linewidth',linewidth-0.5);
+%                         semilogy(f,P, '-.', 'Color',"#D95319", 'linewidth',linewidth-0.5); % D95319 EDB120
 %                         hold off
 
                         legend({'experimental','fitted','simulated t_0=0.085','simulated t_0=0.08','simulated t_0=0.095'}, 'FontSize',axisLabelFntSz);

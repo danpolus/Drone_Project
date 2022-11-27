@@ -31,6 +31,18 @@ def signalProc(signalArray, eeg, projParams):
     # PSD
     _, Pxx_den = signal.welch(Filtered, fs=eeg.sfreq, nperseg=500, noverlap=450, scaling='spectrum', axis=1)
 
+    # f, Pxx = signal.welch(signalArray[elec,:], fs=eeg.sfreq, nperseg=1000, noverlap=450, scaling='spectrum', axis=1)
+    # plt.figure(figsize=(12, 8))
+    # plt.plot(f, Pxx[0, :], f, Pxx[1, :], linewidth=2.3)
+    # plt.xlim([4, 36])
+    # plt.xticks(fontsize=16)
+    # plt.yticks(fontsize=16)
+    # plt.xlabel('Hz', fontsize=20)
+    # plt.ylabel('AU', fontsize=20)
+    # plt.legend(['O1', 'O2'], fontsize=20)
+    # plt.title('Occipital Electrodes Power Spectra', fontsize=22)
+    # plt.show()
+
     # use the whole PSD as features
     featuresDF = pd.DataFrame(Pxx_den.flatten())
 

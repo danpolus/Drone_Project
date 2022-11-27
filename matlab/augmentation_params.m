@@ -62,7 +62,7 @@ project_params.nftfit.spatial_fit_flg = false;
 project_params.nftfit.psdMethod = 'fft';
 project_params.nftfit.freqBandHz = [pipelineParams.passBandHz{1} pipelineParams.passBandHz{2}];
 project_params.nftfit.weigths1f_flg = false;
-project_params.nftfit.npoints = 2e4;
+project_params.nftfit.npoints = 2e3;
 project_params.nftfit.chisqThrsh = 7; %for spatial fit warning
 
 %%%%NFT simulation
@@ -75,11 +75,11 @@ project_params.nftsim.out_dt = 1/project_params.fs;
 
 %%%%Augmentation
 project_params.augmentation.augment_correct_trial_only_flg = true;
-project_params.augmentation.factor = 6;
+project_params.augmentation.factor = 2;
 project_params.augmentation.just_guasian_noise_flg = false;
 % project_params.augmentation.params2vary = {'alpha',[10 150],14; 'gammae',[40 280],25; 't0',[0.04 0.24],0.003}; %param name, limits, standard deviation
 project_params.augmentation.params2vary = {'alpha',[10 150],14};
 project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
-% project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor*3;
-project_params.augmentation.variation_factor = 0.15;
-project_params.out_fn_prefix = '';
+% project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor*10;
+project_params.augmentation.variation_factor = 0;
+project_params.out_fn_prefix = 'x2_';
