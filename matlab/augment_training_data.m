@@ -49,6 +49,8 @@ for iFolder = 1:length(in_fp)
     if augment_csp_source_data
         Trials_t = Sources_t;
         clear("Sources_t");
+    else
+        Trials_t = [Trials_t, Trials_t];
     end
     for iFold = 1:length(Trials_t)-1 %last fold is the full set
 
