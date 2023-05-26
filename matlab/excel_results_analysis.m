@@ -210,13 +210,17 @@ function disp_aug_results(class100, class50, augmnt, good_subj, group_inx, titl,
             end
             auggroup = augmnt{i}(group_inx_,2);
             class100group = class100(group_inx_,2); class50group = class50(group_inx_,2); 
-            diffclass100 = auggroup - class100group; diffclass50 = auggroup - class50group;
             [~,p_class100] = ttest(auggroup,class100group); [~,p_class50] = ttest(auggroup,class50group);
-            disp(['MEAN class100: ' num2str(mean(class100group),'%.3f') '+-' num2str(std(class100group),'%.3f') ' (median: ' num2str(median(class100group),'%.3f') '),'...
-            '  class50: ' num2str(mean(class50group),'%.3f') '+-' num2str(std(class50group),'%.3f') ' (median: ' num2str(median(class50group),'%.3f') '),'...
+%             p_class100 = ranksum(auggroup,class100group); p_class50 = ranksum(auggroup,class50group);
+            disp(['MEAN class100: ' num2str(mean(class100group),'%.3f') '+-' num2str(std(class100group),'%.3f') ' p<' num2str(p_class100,'%.3f') ' (median: ' num2str(median(class100group),'%.3f') '),'...
+            '  class50: ' num2str(mean(class50group),'%.3f') '+-' num2str(std(class50group),'%.3f') ' p<' num2str(p_class50,'%.3f') ' (median: ' num2str(median(class50group),'%.3f') '),'...
             '  augmented: ' num2str(mean(auggroup),'%.3f') '+-' num2str(std(auggroup),'%.3f') ' (median: ' num2str(median(auggroup),'%.3f') ')']);
+            diffclass100 = auggroup - class100group; diffclass50 = auggroup - class50group; diffclass10050 = class100group - class50group;
+            [~,p_class100] = ttest(diffclass100); [~,p_class50] = ttest(diffclass50);            
+%             p_class100 = signrank(diffclass100); p_class50 = signrank(diffclass50); 
             disp(['MEAN DIFF class100: ' num2str(mean(diffclass100),'%.3f') '+-' num2str(std(diffclass100),'%.3f') ' p<' num2str(p_class100,'%.3f') ' (median: ' num2str(median(diffclass100),'%.3f') '),'...
-            '  class50: ' num2str(mean(diffclass50),'%.3f') '+-' num2str(std(diffclass50),'%.3f') ' p<' num2str(p_class50,'%.3f') ' (median: ' num2str(median(diffclass50),'%.3f') ')']);     
+            '  class50: ' num2str(mean(diffclass50),'%.3f') '+-' num2str(std(diffclass50),'%.3f') ' p<' num2str(p_class50,'%.3f') ' (median: ' num2str(median(diffclass50),'%.3f') '),'...
+            '  GAP: ' num2str(mean(diffclass10050),'%.3f') '+-' num2str(std(diffclass10050),'%.3f') ' (median: ' num2str(median(diffclass10050),'%.3f') ')']);     
 
             boxData{g}(:,1:2) = [class100group, class50group];
             boxData{g}(:,2+i) = auggroup;
