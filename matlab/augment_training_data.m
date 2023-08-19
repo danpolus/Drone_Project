@@ -13,12 +13,12 @@ plot_flg = false;
 
 if augment_csp_source_data
     project_params.nftfit.freqBandHz = project_params.sourceFreqBandHz;
-    in_fn = 'source_data.mat';
-    out_fn = 'augmented_source_data.mat';
+    in_fn = [project_params.in_fn_prefix 'source_data.mat'];
+    out_fn = [project_params.out_fn_prefix project_params.in_fn_prefix 'augmented_source_data.mat'];
 else
     orig_grid_edge = project_params.nftsim.grid_edge;
-    in_fn = 'train_data.mat';
-    out_fn = 'augmented_train_data.mat';
+    in_fn = [project_params.in_fn_prefix 'train_data.mat'];
+    out_fn = [project_params.out_fn_prefix project_params.in_fn_prefix 'augmented_train_data.mat'];
 end
 project_params.nftsim.grid_edge = 1;
 
@@ -27,6 +27,7 @@ project_params.nftsim.grid_edge = 1;
 % [in_fn, in_fp] = uigetfile([project_params.data_fp '\*.mat'], 'select trainig data');
 in_fp = [];
 in_dir = uigetdir(project_params.data_fp, 'select trainig data folder');
+% in_dir = 'C:\My Files\Work\BGU\Datasets\drone BCI\2a';
 fp = [in_dir '\'];
 if isfile([fp in_fn])
     in_fp = {fp};
@@ -49,6 +50,8 @@ for iFolder = 1:length(in_fp)
     if augment_csp_source_data
         Trials_t = Sources_t;
         clear("Sources_t");
+    elseif isstruct(Trials_t)
+        Trials_t = {Trials_t, Trials_t};
     else
         Trials_t = [Trials_t, Trials_t];
     end
@@ -171,6 +174,13 @@ for iFolder = 1:length(in_fp)
                 EEGaug = pop_select(EEGaug, 'nochannel',EEGaug.bad_channels);
                 EEGaug = eeg_interp(EEGaug, readlocs(project_params.electrodes_fn));
             end
+            
+%             % if we apply laplacian on the original data, perhaps apply laplacian on the simulated data. 
+%             % anyhow, play with fit/simulate spatial filtering
+%             if project_params.isMEG_flg
+%                 [G,H] = GetGH(ExtractMontage({EEGaug.chanlocs.labels}',[EEGaug.chanlocs.sph_theta]',[EEGaug.chanlocs.sph_phi]',{EEGaug.chanlocs.labels}'));
+%                 EEGaug.data = CSD(single(EEGaug.data),G,H);
+%             end
 
             %plot augmented data
             if plot_flg
@@ -204,12 +214,13 @@ for iFolder = 1:length(in_fp)
 
     if augment_csp_source_data
         Sources_t = Trials_t;
-        save([in_fp{iFolder} project_params.out_fn_prefix out_fn],'Sources_t');
+        save([in_fp{iFolder} out_fn],'Sources_t');
     else
-        save([in_fp{iFolder} project_params.out_fn_prefix out_fn],'Trials_t');
+        save([in_fp{iFolder} out_fn],'Trials_t');
     end
 
 end
 
+disp(project_params.out_fn_prefix);
 datetime(now,'ConvertFrom','datenum');
 % delete(poolobj);

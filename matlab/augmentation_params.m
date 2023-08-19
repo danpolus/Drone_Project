@@ -1,6 +1,8 @@
 %doc nft analysis parameters
 function project_params = augmentation_params()
 
+project_params.isMEG_flg = false; %different setup, no volume conduction
+
 project_params.code_fp = '..\..\..';
 project_params.data_fp = 'C:\My Files\Work\BGU\Datasets\drone BCI';
 
@@ -81,5 +83,62 @@ project_params.augmentation.just_guasian_noise_flg = false;
 project_params.augmentation.params2vary = {'alpha',[10 150],14};
 project_params.augmentation.n_variations = 1; %set to 1 to avoid random variations
 % project_params.augmentation.n_variations = size(project_params.augmentation.params2vary,1)*project_params.augmentation.factor*10;
-project_params.augmentation.variation_factor = 0;
-project_params.out_fn_prefix = 'x2_';
+project_params.augmentation.variation_factor = 0.5;
+
+%%%%NFT stim
+project_params.stim.area = 'None'; % 'Cortical' 'Reticular' 'S_Relay' 'None'
+project_params.stim.dendrites = [];
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%setups:
+project_params.in_fn_prefix = 'Small33cls2ICARMS_';
+varfac = [num2str(floor(project_params.augmentation.variation_factor)) num2str(100*rem(project_params.augmentation.variation_factor,1))];
+project_params.out_fn_prefix = ['x' num2str(project_params.augmentation.factor)];
+if project_params.augmentation.just_guasian_noise_flg
+    project_params.out_fn_prefix = [project_params.out_fn_prefix 'WhiteNoise' varfac];
+else
+    if isempty(project_params.nftfit.params2fit)
+        project_params.out_fn_prefix = [project_params.out_fn_prefix 'TypFit'];
+    else
+        project_params.out_fn_prefix = [project_params.out_fn_prefix 'FullFit'];
+    end
+    if project_params.augmentation.n_variations>1
+        for iParam = 1:size(project_params.augmentation.params2vary,1)
+            project_params.out_fn_prefix = [project_params.out_fn_prefix project_params.augmentation.params2vary{iParam,1} varfac];
+        end
+    end
+end
+project_params.out_fn_prefix = [project_params.out_fn_prefix '_'];
+
+%
+%rsults:
+% Full100cls2CSPBandPower_ train 0.670+-0.185, validation 0.498+-0.289
+% Small33cls2CSPBandPower_ train 0.763+-0.133, validation 0.452+-0.287
+% Noise33cls2CSPBandPower_ train 0.623+-0.138, validation 0.434+-0.287
+% x1TypFit_Small33cls2CSPBandPower_ train 0.838+-0.094, validation 0.469+-0.296
+% x2TypFit_Small33cls2CSPBandPower_ train 0.868+-0.078, validation 0.463+-0.302
+% x2FullFit_Small33cls2CSPBandPower_ train 0.818+-0.080, validation 0.427+-0.294
+% x2WhiteNoise050_Small33cls2CSPBandPower_ train 0.896+-0.061, validation 0.453+-0.290
+% x2TypFitalpha050_Small33cls2CSPBandPower_ train 0.870+-0.053, validation 0.424+-0.279
+% x2TypFitalpha050gammae050t0050_Small33cls2CSPBandPower_ train 0.383+-0.131, validation 0.062+-0.103
+% x5TypFit_Small33cls2CSPBandPower_ train 0.919+-0.051, validation 0.460+-0.297
+
+% Full100cls2CSPHiguchi_ train 0.581+-0.255, validation 0.456+-0.341
+% Small33cls2CSPHiguchi_ train 0.641+-0.232, validation 0.428+-0.336
+
+% Full100cls2ICARMS_ train 0.511+-0.305, validation 0.405+-0.364
+% Small33cls2ICARMS_ train 0.581+-0.266, validation 0.374+-0.348
+% x2TypFit_Small33cls2ICARMS_ train 0.823+-0.115, validation 0.366+-0.348
+% x2FullFit_Small33cls2ICARMS_ train 0.801+-0.111, validation 0.325+-0.319
+% AVERAGE ACCURACY:   train 0.452+-0.274, validation 0.374+-0.310, test -1.000+-0.000
+% AVERAGE ACCURACY 16%:   train 0.565+-0.242, validation 0.294+-0.288, test -1.000+-0.000
+% AVERAGE ACCURACY 16+84%: train 0.889+-0.052, validation 0.285+-0.294, test -1.000+-0.000
+
+% Full100cls2ICAEntropy_ train 0.589+-0.257, validation 0.430+-0.328
+% Small33cls2ICAEntropy_ train 0.702+-0.221, validation 0.368+-0.309
+% x2TypFit_Small33cls2ICAEntropy_ train 0.859+-0.098, validation 0.353+-0.299
+% AVERAGE ACCURACY:   train 0.495+-0.262, validation 0.365+-0.335, test -1.000+-0.000
+% AVERAGE ACCURACY 16%:   train 0.754+-0.164, validation 0.249+-0.257, test -1.000+-0.000
+% AVERAGE ACCURACY 16+84%: train 0.911+-0.048, validation 0.248+-0.279, test -1.000+-0.000
+%
