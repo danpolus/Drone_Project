@@ -93,11 +93,14 @@ for iFolder = 1:length(in_fp)
 
             if project_params.augmentation.just_guasian_noise_flg
                 EEGaug = EEG;
-                EEGaug.data = EEGaug.data(:,:,randperm(EEGaug.trials));
                 EEGaug.data = repmat(EEGaug.data, [1, 1, ceil(n_aug_trials/EEG.trials)]);
-                EEGaug.data = EEGaug.data(:,:,1:n_aug_trials); EEGaug.trials = n_aug_trials;
+                EEGaug.data = EEGaug.data(:,:,1:n_aug_trials); 
+                EEGaug.trials = n_aug_trials;
+                EEGaug.data = EEGaug.data(:,:,randperm(EEGaug.trials));
                 EEGaug = eeg_checkset(eeg2epoch(EEGaug));
-                EEGaug.data = double(EEGaug.data + randn(size(EEGaug.data)).*std(EEGaug.data,0,2)*project_params.augmentation.variation_factor);
+                white_noise = randn(size(EEGaug.data)).*std(EEGaug.data,0,2)*project_params.augmentation.variation_factor;
+%                 white_noise = (white_noise' * chol(cov(EEGaug.data'), 'lower')')'; % add correlated noise: Cholesky decomposition of the covariance matrix
+                EEGaug.data = double(EEGaug.data + white_noise);
 
             else
                 EEGaug = [];
@@ -124,7 +127,7 @@ for iFolder = 1:length(in_fp)
                     end
 
                     %augment
-%                     NFTparams.t0(:) = 0.085; %for plotting
+%                     NFTparams.t0(:) = 0.079; %for plotting
                     [central_chan_data, isSimSuccess] = variate_augmentation(NFTparams, Spectra, project_params, iChan, n_aug_trials, trial_len_sec);
                     %normalize
                     if band_power_normalization_flg
@@ -145,26 +148,38 @@ for iFolder = 1:length(in_fp)
                     end
 
                     if plot_flg
-                        titleFntSz = 26;
-                        sgtitleFntSz = 29;
-                        axisLabelFntSz = 24;
-                        axisTickFntSz = 24;
+                        % titleFntSz = 26;
+                        % sgtitleFntSz = 29;
+                        axisLabelFntSz = 35;
+                        axisTickFntSz = 35;
                         linewidth = 4;
+                        GridColor = [0.8 0.8 0.8];
+                        GridAlpha = 0.9;
+                        lineColors = linspecer(5);
 
                         [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
                             project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
 
-                        figure; semilogy(Spectra.f,Spectra.P,'k', Spectra.f_fit,abs(Spectra.P_fit),'--g', f,P,'m', 'linewidth',linewidth);
-                        ax = gca;
-                        ax.FontSize = axisTickFntSz;
-                        xlabel('Hz', 'FontSize',axisLabelFntSz); ylabel('V^2', 'FontSize',axisLabelFntSz);
-
+                        figure; 
+                        P_fit = Spectra.P_fit(Spectra.f_fit>=Spectra.f(1)-3 & Spectra.f_fit<=Spectra.f(end)+3);
+                        f_fit = Spectra.f_fit(Spectra.f_fit>=Spectra.f(1)-3 & Spectra.f_fit<=Spectra.f(end)+3);
+                        semilogy(Spectra.f,Spectra.P, f_fit,abs(P_fit),'--', f,P, 'linewidth',linewidth);
 %                         hold on
-%                         semilogy(f,P, '-.', 'Color',"#D95319", 'linewidth',linewidth-0.5); % D95319 EDB120
+%                         semilogy(f,P, '-.', 'linewidth',linewidth-0.5);
 %                         hold off
 
-                        legend({'experimental','fitted','simulated t_0=0.085','simulated t_0=0.08','simulated t_0=0.095'}, 'FontSize',axisLabelFntSz);
-                        title('t_0 Parameter Variation Spectra', 'FontSize',titleFntSz);
+                        ax = gca;
+                        ax.XGrid = "on"; ax.YGrid = "on"; ax.GridColor = GridColor; ax.GridAlpha = GridAlpha;
+                        ax.XMinorGrid = "on"; ax.YMinorGrid = "on"; ax.MinorGridColor = GridColor; ax.MinorGridAlpha = GridAlpha;
+                        ax.Box = "off";
+                        ax.ColorOrder = lineColors;
+                        ax.FontSize = axisTickFntSz;
+                        xlabel('Hz', 'FontSize',axisLabelFntSz); ylabel('V^2', 'FontSize',axisLabelFntSz); 
+                        % title('t_0 Parameter Variation Spectra', 'FontSize',titleFntSz);
+%                         legend({' experimental',' fitted',' simulated'}, 'FontSize',axisLabelFntSz);
+                        legend({' experimental',' fitted',' simulated t_0=0.085',' simulated t_0=0.079',' simulated t_0=0.095'}, 'FontSize',axisLabelFntSz);
+%                         legend({' experimental',' fitted',' simulated \gamma=116',' simulated \gamma=70',' simulated \gamma=150'}, 'FontSize',axisLabelFntSz);
+%                         legend({' experimental',' fitted',' simulated \alpha=83',' simulated \alpha=60',' simulated \alpha=120'}, 'FontSize',axisLabelFntSz);
                     end
                 end
             end

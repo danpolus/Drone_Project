@@ -90,8 +90,8 @@ def getParams():
         #setups
         projParams['MiParams']['label_keys'] = (1, 2)
         projParams['MiParams']['decomposition'] = 'CSP'
-        projParams['MiParams']['feature'] = 'BandPower'
-        projParams['MiParams']['input_prefix'] = '' #set only when testing augmentation!!!!  x1TypFitCorrectTrl_
+        projParams['MiParams']['feature'] = 'BandPower' #BandPower Higuchi
+        projParams['MiParams']['input_prefix'] = 'x1TypFit_' #set only when testing augmentation!!!!  x2TypFitalpha050_
         mode = 'Small' #Full Small Noise
 
         projParams['MiParams']['n_csp_comp'] = int(np.ceil(len(projParams['MiParams']['label_keys'])/2 + 1)*2)

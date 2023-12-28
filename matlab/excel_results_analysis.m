@@ -8,15 +8,15 @@ linewidth = 4;
 
 nClass = '2';
 feature = {'bandpower','higuchi'};
-train100thresh = 0.2; %kappa threshold for filtering
-valid50thresh = 0.6; %kappa threshold for grouping
+train100thresh = 0; %kappa threshold for filtering
+valid50thresh = 0.35; %kappa threshold for grouping
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %nCSP analysis
 x = [2 4 6 8 10];
 
 figure;
-sgtitle('Validation set classification accuracy as a function of #CSPs', 'FontSize',FntSz.sgtitle);
+% sgtitle('Validation set classification accuracy as a function of #CSPs', 'FontSize',FntSz.sgtitle);
 for iFeat = 1:length(feature)
     T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a nCSP.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
     valid = T{1:18,3:4:size(T,2)};
@@ -24,7 +24,10 @@ for iFeat = 1:length(feature)
     ax = subplot(2,1,iFeat); 
     errorbar(x, mean(valid,1), std(valid,[],1), 'Color','#A2142F', 'linewidth',linewidth); 
     xlim([x(1)-1 x(end)+1]); ylim([0 1.1]);
-    xlabel('#CSPs', 'FontSize',FntSz.axisLabel-5); ylabel('\kappa', 'FontSize',FntSz.axisLabel+2); 
+    if iFeat == length(feature)
+        xlabel('#CSPs', 'FontSize',FntSz.axisLabel-5); 
+    end
+    ylabel('\kappa', 'FontSize',FntSz.axisLabel+2); 
     ax.FontSize = FntSz.axisTick;
     if strcmp(feature{iFeat}, 'bandpower')
         title('Total Power', 'FontSize',FntSz.title-3);

@@ -92,7 +92,7 @@ project_params.stim.dendrites = [];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %setups:
-project_params.in_fn_prefix = 'Small33cls2ICARMS_';
+project_params.in_fn_prefix = 'Small33cls2CSPBandPower_';
 varfac = [num2str(floor(project_params.augmentation.variation_factor)) num2str(100*rem(project_params.augmentation.variation_factor,1))];
 project_params.out_fn_prefix = ['x' num2str(project_params.augmentation.factor)];
 if project_params.augmentation.just_guasian_noise_flg

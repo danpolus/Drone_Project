@@ -1,9 +1,11 @@
 clear all; close all; clc;
 
-train100thresh = 0.2; %kappa threshold for filtering
-% train100thresh = 0; %kappa threshold for filtering
+train100thresh = 0; % 0.2 %kappa threshold for filtering
 valid50thresh = 0.05:0.05:0.95; %kappa threshold for grouping
 setType = 'valid';
+
+kappa = []; % if empty, search the best kappa
+p_alpha = 0.05;
 
 fp = 'C:\My Files\Work\BGU\Datasets\drone BCI\2a\';
 out_fn = 'aumentation_summary.xlsx';
@@ -13,7 +15,7 @@ FntSz.sgtitle = 40;
 FntSz.axisLabel = 30;
 FntSz.axisTick = 30;
 
-plot_flg = true;
+plot_flg = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [fn, fp] = uigetfile([fp '*.csv'], 'Select FULL set classification results');
@@ -28,8 +30,8 @@ for iFile = 1:length(files)
     classAug(iFile) = extract_results_class_acc(files{iFile}, fp);
 end
 
-good_subj_inx = classFull.train>=train100thresh & classSmall.valid>0 & classFull.valid>=classSmall.valid; %  minimal accuracy for MI & can't start below chance & improvement not due to augmentation
-resSumary = summarize_results(classFull, classSmall, classAug, setType, good_subj_inx, valid50thresh);
+good_subj_inx = classFull.train>train100thresh & classSmall.valid>0 & classFull.valid>=classSmall.valid; %  minimal accuracy for MI & can't start below chance & improvement not due to augmentation
+resSumary = summarize_results(classFull, classSmall, classAug, setType, good_subj_inx, valid50thresh, kappa, p_alpha);
 writetable(resSumary,[fp out_fn]);
 
 if plot_flg
@@ -65,32 +67,37 @@ function classAcc = extract_results_class_acc(csvFN, csvFP)
     classAcc.validStd = csvData(:,5);
 end
 
-function resSumary = summarize_results(classFull, classSmall, classAug, setType, good_subj_inx, kappaThresh)
+function resSumary = summarize_results(classFull, classSmall, classAug, setType, good_subj_inx, kappaThresh, th_kappa, p_alpha)
     resSumary = table();
     for iAug = 1:length(classAug)
-        pVals = inf(1,length(kappaThresh));
-        diffMeans = -inf(1,length(kappaThresh));
-        for iKappa = 1:length(kappaThresh)
-%             group_inx = classFull.(setType)>=kappaThresh(iKappa);
-            group_inx = classSmall.(setType)>=kappaThresh(iKappa);
-%             accStat = get_statistics(classAug(iAug), classFull, setType, good_subj_inx & group_inx, kappaThresh(iKappa));
-            accStat = get_statistics(classAug(iAug), classSmall, setType, good_subj_inx & group_inx, kappaThresh(iKappa));
-            pVals(iKappa) = accStat.p_val;
-            diffMeans(iKappa) = accStat.diffmean;
+        if isempty(th_kappa) %find kappa with maximal significant accuracy difference 
+            pVals = inf(1,length(kappaThresh));
+            diffMeans = -inf(1,length(kappaThresh));
+            for iKappa = 1:length(kappaThresh)
+                group_inx = classSmall.(setType)>=kappaThresh(iKappa);
+                accStat = get_statistics(classAug(iAug), classSmall, setType, good_subj_inx & group_inx, kappaThresh(iKappa));
+                pVals(iKappa) = accStat.p_val;
+                diffMeans(iKappa) = accStat.diffmean;
+            end
+            if any(pVals<p_alpha)
+                diffMeans(pVals>=p_alpha) = NaN;
+            end
+            [~,kappaInx] = max(diffMeans);
+            kappa = kappaThresh(kappaInx);
+        else 
+            kappa = th_kappa;
         end
-%         [~,kappaInx] = max(diffMeans);
-        [~,kappaInx] = min(pVals);
-%         group_inx = classFull.(setType)>=kappaThresh(kappaInx);
-        group_inx = classSmall.(setType)>=kappaThresh(kappaInx);
-        resSumary = [resSumary; struct2table(get_statistics(classFull, classSmall, setType, good_subj_inx, -inf))];
-        resSumary = [resSumary; struct2table(get_statistics(classFull, classSmall, setType,  good_subj_inx & group_inx, kappaThresh(kappaInx)))];
-        resSumary = [resSumary; struct2table(get_statistics(classFull, classSmall, setType,  good_subj_inx & ~group_inx, -kappaThresh(kappaInx)))];
-        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classSmall, setType, good_subj_inx, -inf))];
-        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classSmall, setType,  good_subj_inx & group_inx, kappaThresh(kappaInx)))];
-        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classSmall, setType,  good_subj_inx & ~group_inx, -kappaThresh(kappaInx)))];        
-        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classFull, setType, good_subj_inx, -inf))];
-        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classFull, setType,  good_subj_inx & group_inx, kappaThresh(kappaInx)))];
-        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classFull, setType,  good_subj_inx & ~group_inx, -kappaThresh(kappaInx)))];        
+
+        group_inx = classSmall.(setType)>=kappa;
+        resSumary = [resSumary; struct2table(get_statistics(classFull, classSmall, setType, good_subj_inx, 0))];
+        resSumary = [resSumary; struct2table(get_statistics(classFull, classSmall, setType,  good_subj_inx & group_inx, kappa))];
+        resSumary = [resSumary; struct2table(get_statistics(classFull, classSmall, setType,  good_subj_inx & ~group_inx, -kappa))];
+        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classSmall, setType, good_subj_inx, 0))];
+        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classSmall, setType,  good_subj_inx & group_inx, kappa))];
+        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classSmall, setType,  good_subj_inx & ~group_inx, -kappa))];        
+        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classFull, setType, good_subj_inx, 0))];
+        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classFull, setType,  good_subj_inx & group_inx, kappa))];
+        resSumary = [resSumary; struct2table(get_statistics(classAug(iAug), classFull, setType,  good_subj_inx & ~group_inx, -kappa))];        
     end
 end
 
@@ -101,6 +108,7 @@ function accStat = get_statistics(classAcc1, classAcc2, setType, group_inx, kapp
     accStat.Name1 = string(classAcc1.Name);
     accStat.Name2 = string(classAcc2.Name);
     accStat.kappa = kappa;
+    accStat.nSubjects = sum(group_inx);
     accStat.acc1mean = mean(acc1);
     accStat.acc1std = std(acc1);
     accStat.acc1med = median(acc1);
