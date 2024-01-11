@@ -1,10 +1,8 @@
 clear all; close all; clc;
 
-FntSz.title = 36;
-FntSz.sgtitle = 40;
-FntSz.axisLabel = 30;
-FntSz.axisTick = 30;
-linewidth = 4;
+project_params = augmentation_params();
+project_params.grapics.axisLabelFntSz = 30;
+project_params.grapics.axisTickFntSz = 30;
 
 nClass = '2';
 feature = {'bandpower','higuchi'};
@@ -16,23 +14,23 @@ valid50thresh = 0.35; %kappa threshold for grouping
 x = [2 4 6 8 10];
 
 figure;
-% sgtitle('Validation set classification accuracy as a function of #CSPs', 'FontSize',FntSz.sgtitle);
+% sgtitle('Validation set classification accuracy as a function of #CSPs', 'FontSize',project_params.grapics.sgtitleFntSz);
 for iFeat = 1:length(feature)
     T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a nCSP.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
     valid = T{1:18,3:4:size(T,2)};
 
     ax = subplot(2,1,iFeat); 
-    errorbar(x, mean(valid,1), std(valid,[],1), 'Color','#A2142F', 'linewidth',linewidth); 
+    errorbar(x, mean(valid,1), std(valid,[],1), 'Color','#A2142F', 'linewidth',project_params.grapics.linewidth); 
     xlim([x(1)-1 x(end)+1]); ylim([0 1.1]);
     if iFeat == length(feature)
-        xlabel('#CSPs', 'FontSize',FntSz.axisLabel-5); 
+        xlabel('#CSPs', 'FontSize',project_params.grapics.axisLabelFntSz-5); 
     end
-    ylabel('\kappa', 'FontSize',FntSz.axisLabel+2); 
-    ax.FontSize = FntSz.axisTick;
+    ylabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2); 
+    ax.FontSize = project_params.grapics.axisTickFntSz;
     if strcmp(feature{iFeat}, 'bandpower')
-        title('Total Power', 'FontSize',FntSz.title-3);
+        title('Total Power', 'FontSize',project_params.grapics.titleFntSz-3);
     else
-        title('Higuchi', 'FontSize',FntSz.title-3);
+        title('Higuchi', 'FontSize',project_params.grapics.titleFntSz-3);
     end
 end
 
@@ -41,7 +39,7 @@ end
 x = [100 50 33.33 25 20 16.67 14.28 10 7.15 5];
 
 figure;
-sgtitle('Classification accuracy as a funtion of the traing set percent', 'FontSize',FntSz.sgtitle);
+sgtitle('Classification accuracy as a funtion of the traing set percent', 'FontSize',project_params.grapics.sgtitleFntSz);
 for iFeat = 1:length(feature)
     T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a test percent.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
     
@@ -49,71 +47,71 @@ for iFeat = 1:length(feature)
     hold on
     y = mean(T{1:18, 2:4:size(T,2)},1);
     err = mean(T{1:18, 4:4:size(T,2)},1);
-    errorbar(x,y,err, 'linewidth',linewidth);
+    errorbar(x,y,err, 'linewidth',project_params.grapics.linewidth);
     y = mean(T{1:18, 3:4:size(T,2)},1);
     err = mean(T{1:18, 5:4:size(T,2)},1);
-    errorbar(x,y,err, 'linewidth',linewidth); 
-    xlim([0 110]); ylim([0 1.1]); set(gca,'xdir','reverse'); legend({'train','validation'}, 'FontSize',FntSz.axisLabel, 'Location','northwest');
-    xlabel('data percentage', 'FontSize',FntSz.axisLabel+2); ylabel('\kappa', 'FontSize',FntSz.axisLabel+2);
-    ax.FontSize = FntSz.axisTick;
+    errorbar(x,y,err, 'linewidth',project_params.grapics.linewidth); 
+    xlim([0 110]); ylim([0 1.1]); set(gca,'xdir','reverse'); legend({'train','validation'}, 'FontSize',project_params.grapics.axisLabelFntSz, 'Location','northwest');
+    xlabel('data percentage', 'FontSize',project_params.grapics.axisLabelFntSz+2); ylabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2);
+    ax.FontSize = project_params.grapics.axisTickFntSz;
     %ax.XScale = 'log';
     if strcmp(feature{iFeat}, 'bandpower')
-        title('Total Power', 'FontSize',FntSz.title);
+        title('Total Power', 'FontSize',project_params.grapics.titleFntSz);
     else
-        title('Higuchi', 'FontSize',FntSz.title);
+        title('Higuchi', 'FontSize',project_params.grapics.titleFntSz);
     end
     hold off
 end
 
 figure;
-sgtitle('Subject classification accuracy as a funtion of the traing set percent', 'FontSize',FntSz.sgtitle-6);
+sgtitle('Subject classification accuracy as a funtion of the traing set percent', 'FontSize',project_params.grapics.sgtitleFntSz-6);
 for iFeat = 1:length(feature)
     T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a test percent.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
     
     y = T{1:18,2:4:size(T,2)};
 %     err = T{1:18,4:4:size(T,2)};
-    ax = subplot(2,2,(iFeat-1)*2+1); plot(x,y, 'linewidth',linewidth-1.5); xlim([0 110]); set(gca,'xdir','reverse'); 
-    %hold on; yline((max(y(:,1))+min(y(:,1)))/2, '--k', 'linewidth',linewidth-1); hold off;
-    hold on; yline(valid50thresh, '--k', 'linewidth',linewidth-2); hold off; 
-    xlabel('data percentage', 'FontSize',FntSz.axisLabel-8); ylabel('\kappa', 'FontSize',FntSz.axisLabel+2);
-    ax.FontSize = FntSz.axisTick-8; 
+    ax = subplot(2,2,(iFeat-1)*2+1); plot(x,y, 'linewidth',project_params.grapics.linewidth-1.5); xlim([0 110]); set(gca,'xdir','reverse'); 
+    %hold on; yline((max(y(:,1))+min(y(:,1)))/2, '--k', 'linewidth',project_params.grapics.linewidth-1); hold off;
+    hold on; yline(valid50thresh, '--k', 'linewidth',project_params.grapics.linewidth-2); hold off; 
+    xlabel('data percentage', 'FontSize',project_params.grapics.axisLabelFntSz-8); ylabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2);
+    ax.FontSize = project_params.grapics.axisTickFntSz-8; 
     if strcmp(feature{iFeat}, 'bandpower')
-        title('Total Power (train set)', 'FontSize',FntSz.title-6);
+        title('Total Power (train set)', 'FontSize',project_params.grapics.titleFntSz-6);
     else
-        title('Higuchi (train set)', 'FontSize',FntSz.title-6);
+        title('Higuchi (train set)', 'FontSize',project_params.grapics.titleFntSz-6);
     end
     
     y = T{1:18,3:4:size(T,2)};
 %     err = T{1:18,5:4:size(T,2)};
-    ax = subplot(2,2,(iFeat-1)*2+2); plot(x,y, 'linewidth',linewidth-1.5); xlim([0 110]); set(gca,'xdir','reverse'); 
-    %hold on; yline((max(y(:,1))+min(y(:,1)))/2, '--k', 'linewidth',linewidth-1); hold off;
-    hold on; yline(valid50thresh, '--k', 'linewidth',linewidth-2); hold off;
-    xlabel('data percentage', 'FontSize',FntSz.axisLabel-8); ylabel('\kappa', 'FontSize',FntSz.axisLabel+2);
-    ax.FontSize = FntSz.axisTick-8; 
+    ax = subplot(2,2,(iFeat-1)*2+2); plot(x,y, 'linewidth',project_params.grapics.linewidth-1.5); xlim([0 110]); set(gca,'xdir','reverse'); 
+    %hold on; yline((max(y(:,1))+min(y(:,1)))/2, '--k', 'linewidth',project_params.grapics.linewidth-1); hold off;
+    hold on; yline(valid50thresh, '--k', 'linewidth',project_params.grapics.linewidth-2); hold off;
+    xlabel('data percentage', 'FontSize',project_params.grapics.axisLabelFntSz-8); ylabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2);
+    ax.FontSize = project_params.grapics.axisTickFntSz-8; 
     if strcmp(feature{iFeat}, 'bandpower')
-        title('Total Power (validation set)', 'FontSize',FntSz.title-6);
+        title('Total Power (validation set)', 'FontSize',project_params.grapics.titleFntSz-6);
     else
-        title('Higuchi (validation set)', 'FontSize',FntSz.title-6);
+        title('Higuchi (validation set)', 'FontSize',project_params.grapics.titleFntSz-6);
     end
-    % subplot(2,2,2); plot(x,err, 'linewidth',linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train std');
-    % subplot(2,2,4); plot(x,err, 'linewidth',linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation std');  
+    % subplot(2,2,2); plot(x,err, 'linewidth',project_params.grapics.linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('train std');
+    % subplot(2,2,4); plot(x,err, 'linewidth',project_params.grapics.linewidth-1); xlim([0 110]); set(gca,'xdir','reverse'); xlabel('data percentage'); title('validation std');  
 end
 
 
 figure;
-sgtitle('Baseline Set Validation Accuracy Distribution', 'FontSize',FntSz.sgtitle);
+sgtitle('Baseline Set Validation Accuracy Distribution', 'FontSize',project_params.grapics.sgtitleFntSz);
 for iFeat = 1:length(feature)
     T = readtable('C:\My Files\Work\BGU\PhD\results\drone\results 2a test percent.xlsx','Sheet',[nClass 'class ' feature{iFeat}]);
     y = T{1:18,3:4:size(T,2)};
-    ax = subplot(2,1,iFeat); histogram(y(:,3),8, 'FaceColor',"#FF0000", 'linewidth',linewidth-2);
-    hold on; xline(valid50thresh, '--k', 'linewidth',linewidth-1); hold off; 
-    xlabel('\kappa', 'FontSize',FntSz.axisLabel+2); ylabel('# subjects', 'FontSize',FntSz.axisLabel-8);
-    ax.FontSize = FntSz.axisTick; 
+    ax = subplot(2,1,iFeat); histogram(y(:,3),8, 'FaceColor',"#FF0000", 'linewidth',project_params.grapics.linewidth-2);
+    hold on; xline(valid50thresh, '--k', 'linewidth',project_params.grapics.linewidth-1); hold off; 
+    xlabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2); ylabel('# subjects', 'FontSize',project_params.grapics.axisLabelFntSz-8);
+    ax.FontSize = project_params.grapics.axisTickFntSz; 
     ylim([0,8]); %yticks([0:2:8]);
     if strcmp(feature{iFeat}, 'bandpower')
-        title('Total Power', 'FontSize',FntSz.title-4);
+        title('Total Power', 'FontSize',project_params.grapics.titleFntSz-4);
     else
-        title('Higuchi', 'FontSize',FntSz.title-4);
+        title('Higuchi', 'FontSize',project_params.grapics.titleFntSz-4);
     end      
 end
 
@@ -162,7 +160,7 @@ for iFeat = 1:length(feature)
     % %all
     % good_subj = (1:size(class100,1))';
     % group_inx = true(size(class100,1),1);
-    % disp_aug_results(class100, class50, augmnt, good_subj, group_inx, [titl ' all not filtered'], FntSz, Aug);
+    % disp_aug_results(class100, class50, augmnt, good_subj, group_inx, [titl ' all not filtered'], project_params, Aug);
     % pause
     
     %filter
@@ -172,27 +170,27 @@ for iFeat = 1:length(feature)
         augmnt{i+1} = augmnt{i+1}(good_subj,:);
     end
     group_inx = true(size(class100,1),1);
-    disp_aug_results(class100, class50, augmnt, good_subj, group_inx, titl, FntSz, Aug);
+    disp_aug_results(class100, class50, augmnt, good_subj, group_inx, titl, project_params, Aug);
     % pause
     
     %split by middle value
     % group_inx = class100(:,1)>valid50thresh; %>(max(class100(:,1)) + min(class100(:,1)))/2;
-    % disp_aug_results(class100, class50, augmnt, good_subj, group_inx, 'class100 train above middle', FntSz, Aug);
+    % disp_aug_results(class100, class50, augmnt, good_subj, group_inx, 'class100 train above middle', project_params, Aug);
     % group_inx = class100(:,2)>valid50thresh; %>(max(class100(:,2)) + min(class100(:,2)))/2;
-    % disp_aug_results(class100, class50, augmnt, good_subj, group_inx, 'class100 validation above middle', FntSz, Aug);
+    % disp_aug_results(class100, class50, augmnt, good_subj, group_inx, 'class100 validation above middle', project_params, Aug);
     group_inx = class50(:,2)>valid50thresh; %(max(class50(:,2)) + min(class50(:,2)))/2;
-    disp_aug_results(class100, class50, augmnt, good_subj, group_inx, [titl ' validation \kappa>' num2str(valid50thresh) ' group'], FntSz, Aug);
+    disp_aug_results(class100, class50, augmnt, good_subj, group_inx, [titl ' validation \kappa>' num2str(valid50thresh) ' group'], project_params, Aug);
     % pause
     % 
     % %split by successfull augmentation
     % for i = 1:length(Aug)
     %     group_inx = augmnt{i}(:,2) > class50(:,2);
-    %     disp_aug_results(class100, class50, augmnt, good_subj, group_inx, 'successfull augmentation', FntSz, Aug, i);
+    %     disp_aug_results(class100, class50, augmnt, good_subj, group_inx, 'successfull augmentation', project_params, Aug, i);
     % end
 end
 
 %%%%%%%%%%%%
-function disp_aug_results(class100, class50, augmnt, good_subj, group_inx, titl, FntSz, Aug, kAug)
+function disp_aug_results(class100, class50, augmnt, good_subj, group_inx, titl, project_params, Aug, kAug)
     if nargin == 8
         kAug = 1:length(Aug);
     end
@@ -242,9 +240,9 @@ function disp_aug_results(class100, class50, augmnt, good_subj, group_inx, titl,
         yline(mean(boxData{g}(:,2)),'--', 'Color',"#D95319", 'LineWidth',2.5);
         yline(median(boxData{g}(:,2)),'--', 'Color',"#EDB120", 'LineWidth',2.5);    
         hold off;
-        title(['Augmentation Strategies: ' titl], 'FontSize',FntSz.title);
-        xticklabels([{'100%','33%'},Aug]); ax = gca; ax.FontSize = FntSz.axisTick-4; 
-        ylabel('\kappa', 'FontSize',FntSz.axisLabel+2); ylim([-1,1]);
-        legend({'','average','100% average','100% median','33% average','33% median'}, 'NumColumns',2, 'FontSize',FntSz.axisLabel-6, 'Location','southeast');
+        title(['Augmentation Strategies: ' titl], 'FontSize',project_params.grapics.titleFntSz);
+        xticklabels([{'100%','33%'},Aug]); ax = gca; ax.FontSize = project_params.grapics.axisTickFntSz-4; 
+        ylabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2); ylim([-1,1]);
+        legend({'','average','100% average','100% median','33% average','33% median'}, 'NumColumns',2, 'FontSize',project_params.grapics.axisLabelFntSz-6, 'Location','southeast');
     end
 end

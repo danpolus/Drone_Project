@@ -19,6 +19,18 @@ project_params.sourceFreqBandHz = [8 30];
 project_params.head_radius = 1; %used to get rid of out-of-scalp channels
 project_params.minSectLenSec = 10; 
 
+%%%%%publishing graphics
+project_params.grapics.fontName = 'Arial';
+project_params.grapics.sgtitleFntSz = 40;
+project_params.grapics.titleFntSz = 37;
+project_params.grapics.axisLabelFntSz = 35;
+project_params.grapics.axisTickFntSz = 35;
+project_params.grapics.textFntSz = 30;
+project_params.grapics.linewidth = 4;
+project_params.grapics.markerSz = 90;
+project_params.grapics.GridColor = [0.8 0.8 0.8];
+project_params.grapics.GridAlpha = 0.9;
+
 %%%%eeglab pipelineParams
 %filtering parameters:
 pipelineParams.passBandHz = [{1}, {45}];

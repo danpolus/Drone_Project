@@ -148,38 +148,29 @@ for iFolder = 1:length(in_fp)
                     end
 
                     if plot_flg
-                        % titleFntSz = 26;
-                        % sgtitleFntSz = 29;
-                        axisLabelFntSz = 35;
-                        axisTickFntSz = 35;
-                        linewidth = 4;
-                        GridColor = [0.8 0.8 0.8];
-                        GridAlpha = 0.9;
-                        lineColors = linspecer(5);
-
                         [P, f] = compute_psd(project_params.nftfit.psdMethod, central_chan_data, EEG.srate, project_params.psd.window_sec, ...
                             project_params.psd.overlap_percent, project_params.nftfit.freqBandHz, false);
 
                         figure; 
                         P_fit = Spectra.P_fit(Spectra.f_fit>=Spectra.f(1)-3 & Spectra.f_fit<=Spectra.f(end)+3);
                         f_fit = Spectra.f_fit(Spectra.f_fit>=Spectra.f(1)-3 & Spectra.f_fit<=Spectra.f(end)+3);
-                        semilogy(Spectra.f,Spectra.P, f_fit,abs(P_fit),'--', f,P, 'linewidth',linewidth);
+                        semilogy(Spectra.f,Spectra.P, f_fit,abs(P_fit),'--', f,P, 'linewidth',project_params.grapics.linewidth);
 %                         hold on
-%                         semilogy(f,P, '-.', 'linewidth',linewidth-0.5);
+%                         semilogy(f,P, '-.', 'linewidth',project_params.grapics.linewidth-0.5);
 %                         hold off
 
                         ax = gca;
-                        ax.XGrid = "on"; ax.YGrid = "on"; ax.GridColor = GridColor; ax.GridAlpha = GridAlpha;
-                        ax.XMinorGrid = "on"; ax.YMinorGrid = "on"; ax.MinorGridColor = GridColor; ax.MinorGridAlpha = GridAlpha;
+                        ax.XGrid = "on"; ax.YGrid = "on"; ax.GridColor = project_params.grapics.GridColor; ax.GridAlpha = project_params.grapics.GridAlpha;
+                        ax.XMinorGrid = "on"; ax.YMinorGrid = "on"; ax.MinorGridColor = project_params.grapics.GridColor; ax.MinorGridAlpha = project_params.grapics.GridAlpha;
                         ax.Box = "off";
-                        ax.ColorOrder = lineColors;
-                        ax.FontSize = axisTickFntSz;
-                        xlabel('Hz', 'FontSize',axisLabelFntSz); ylabel('V^2', 'FontSize',axisLabelFntSz); 
-                        % title('t_0 Parameter Variation Spectra', 'FontSize',titleFntSz);
-%                         legend({' experimental',' fitted',' simulated'}, 'FontSize',axisLabelFntSz);
-                        legend({' experimental',' fitted',' simulated t_0=0.085',' simulated t_0=0.079',' simulated t_0=0.095'}, 'FontSize',axisLabelFntSz);
-%                         legend({' experimental',' fitted',' simulated \gamma=116',' simulated \gamma=70',' simulated \gamma=150'}, 'FontSize',axisLabelFntSz);
-%                         legend({' experimental',' fitted',' simulated \alpha=83',' simulated \alpha=60',' simulated \alpha=120'}, 'FontSize',axisLabelFntSz);
+                        ax.ColorOrder = linspecer(5);
+                        ax.FontSize = project_params.grapics.axisLabelFntSz;
+                        xlabel('Hz', 'FontSize',project_params.grapics.axisLabelFntSz); ylabel('V^2', 'FontSize',project_params.grapics.axisLabelFntSz); 
+                        % title('t_0 Parameter Variation Spectra', 'FontSize',project_params.grapics.titleFntSz);
+%                         legend({' experimental',' fitted',' simulated'}, 'FontSize',project_params.grapics.axisLabelFntSz);
+                        legend({' experimental',' fitted',' simulated t_0=0.085',' simulated t_0=0.079',' simulated t_0=0.095'}, 'FontSize',project_params.grapics.axisLabelFntSz);
+%                         legend({' experimental',' fitted',' simulated \gamma=116',' simulated \gamma=70',' simulated \gamma=150'}, 'FontSize',project_params.grapics.axisLabelFntSz);
+%                         legend({' experimental',' fitted',' simulated \alpha=83',' simulated \alpha=60',' simulated \alpha=120'}, 'FontSize',project_params.grapics.axisLabelFntSz);
                     end
                 end
             end

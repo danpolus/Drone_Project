@@ -10,10 +10,9 @@ p_alpha = 0.05;
 fp = 'C:\My Files\Work\BGU\Datasets\drone BCI\2a\';
 out_fn = 'aumentation_summary.xlsx';
 
-FntSz.title = 36;
-FntSz.sgtitle = 40;
-FntSz.axisLabel = 30;
-FntSz.axisTick = 30;
+project_params = augmentation_params();
+project_params.grapics.axisLabelFntSz = 30;
+project_params.grapics.axisTickFntSz = 30;
 
 plot_flg = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,10 +49,10 @@ if plot_flg
     yline(mean(boxData(:,2)),'--', 'Color',"#D95319", 'LineWidth',2.5);
     yline(median(boxData(:,2)),'--', 'Color',"#EDB120", 'LineWidth',2.5);
     hold off;
-    title(['Augmentation Strategies: ' augName], 'FontSize',FntSz.title);
-    xticklabels([{'Full','Small'},augName]); ax = gca; ax.FontSize = FntSz.axisTick-4;
-    ylabel('\kappa', 'FontSize',FntSz.axisLabel+2); ylim([-1,1]);
-    legend({'','average','Full average','Full median','Small average','Small median'}, 'NumColumns',2, 'FontSize',FntSz.axisLabel-6, 'Location','southeast');
+    title(['Augmentation Strategies: ' augName], 'FontSize',project_params.grapics.titleFntSz);
+    xticklabels([{'Full','Small'},augName]); ax = gca; ax.FontSize = project_params.grapics.axisTickFntSz-4;
+    ylabel('\kappa', 'FontSize',project_params.grapics.axisLabelFntSz+2); ylim([-1,1]);
+    legend({'','average','Full average','Full median','Small average','Small median'}, 'NumColumns',2, 'FontSize',project_params.grapics.axisLabelFntSz-6, 'Location','southeast');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
