@@ -165,12 +165,13 @@ for iFolder = 1:length(in_fp)
                         ax.Box = "off";
                         ax.ColorOrder = linspecer(5);
                         ax.FontSize = project_params.grapics.axisLabelFntSz;
-                        xlabel('Hz', 'FontSize',project_params.grapics.axisLabelFntSz); ylabel('V^2', 'FontSize',project_params.grapics.axisLabelFntSz); 
-                        % title('t_0 Parameter Variation Spectra', 'FontSize',project_params.grapics.titleFntSz);
-%                         legend({' experimental',' fitted',' simulated'}, 'FontSize',project_params.grapics.axisLabelFntSz);
-                        legend({' experimental',' fitted',' simulated t_0=0.085',' simulated t_0=0.079',' simulated t_0=0.095'}, 'FontSize',project_params.grapics.axisLabelFntSz);
-%                         legend({' experimental',' fitted',' simulated \gamma=116',' simulated \gamma=70',' simulated \gamma=150'}, 'FontSize',project_params.grapics.axisLabelFntSz);
-%                         legend({' experimental',' fitted',' simulated \alpha=83',' simulated \alpha=60',' simulated \alpha=120'}, 'FontSize',project_params.grapics.axisLabelFntSz);
+                        ax.FontName = project_params.grapics.fontName;
+                        xlabel('Hz', 'FontSize',project_params.grapics.axisLabelFntSz, 'FontName',project_params.grapics.fontName); ylabel('V^2', 'FontSize',project_params.grapics.axisLabelFntSz,'FontName',project_params.grapics.fontName); 
+                        % title('t_0 Parameter Variation Spectra', 'FontSize',project_params.grapics.titleFntSz,'FontName',project_params.grapics.fontName);
+%                         legend({' experimental',' fitted',' simulated'}, 'FontSize',project_params.grapics.axisLabelFntSz,'FontName',project_params.grapics.fontName);
+                        legend({' experimental',' fitted',' simulated t_0=0.085',' simulated t_0=0.079',' simulated t_0=0.095'}, 'FontSize',project_params.grapics.axisLabelFntSz, 'FontName',project_params.grapics.fontName);
+%                         legend({' experimental',' fitted',' simulated \gamma=116',' simulated \gamma=70',' simulated \gamma=150'}, 'FontSize',project_params.grapics.axisLabelFntSz,'FontName',project_params.grapics.fontName);
+%                         legend({' experimental',' fitted',' simulated \alpha=83',' simulated \alpha=60',' simulated \alpha=120'}, 'FontSize',project_params.grapics.axisLabelFntSz,'FontName',project_params.grapics.fontName);
                     end
                 end
             end

@@ -21,14 +21,14 @@ project_params.minSectLenSec = 10;
 
 %%%%%publishing graphics
 project_params.grapics.fontName = 'Arial';
-project_params.grapics.sgtitleFntSz = 40;
-project_params.grapics.titleFntSz = 37;
-project_params.grapics.axisLabelFntSz = 35;
-project_params.grapics.axisTickFntSz = 35;
+project_params.grapics.sgtitleFntSz = 48;
+project_params.grapics.titleFntSz = 44;
+project_params.grapics.axisLabelFntSz = 40;
+project_params.grapics.axisTickFntSz = 34;
 project_params.grapics.textFntSz = 30;
 project_params.grapics.linewidth = 4;
 project_params.grapics.markerSz = 90;
-project_params.grapics.GridColor = [0.8 0.8 0.8];
+project_params.grapics.GridColor = [0.5 0.5 0.5];
 project_params.grapics.GridAlpha = 0.9;
 
 %%%%eeglab pipelineParams
